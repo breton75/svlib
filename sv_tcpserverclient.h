@@ -11,26 +11,49 @@
 
 #include "../../svlib/sv_log.h"
 
-/*** constants ***/
-const int dontWait = -1;
-const int infinite = 0;
+namespace svtcp {
 
-enum SocketErrors
-{
-  SOCK_ERROR = -1,
-  SOCKET_OK,
-  SOCKET_BAD_CONNECTION,
-  SOCKET_WRONG_IP,
-  SOCKET_WRONG_PORT,
-  SOCKET_CONNECTION_FAULT,
-  SOCKET_ALREADY_CONNECTED,
-  SOCKET_NOT_CONNECTED,
-  SOCKET_TIMEOUT,
-  SOCKET_AWAITING_CANCELED,
-  SOCKET_CONNECTION_CLOSED
-};
+  /*** constants ***/
+  enum ResponseAwaiting {  
+    DontWait = -1,
+    Infinite = 0
+  };
+  
+  enum SocketErrors
+  {
+    SOCK_UNKNOWN_ERROR = -1,
+    SOCKET_OK,
+    SOCKET_BAD_CONNECTION,
+    SOCKET_WRONG_IP,
+    SOCKET_WRONG_PORT,
+    SOCKET_CONNECTION_FAULT,
+    SOCKET_ALREADY_CONNECTED,
+    SOCKET_NOT_CONNECTED,
+    SOCKET_TIMEOUT,
+    SOCKET_AWAITING_CANCELED,
+    SOCKET_CONNECTION_CLOSED
+  };
+  
+  enum LogDataFlags {
+    LogInData = 0x1,
+    InDataAsHex = 0x2,
+    LogOutData = 0x4,
+    OutDataAsHex = 0x8,
+    LogInOutData = 0x5
+  };
+  
+  struct Response {
+    QByteArray data;
+    quint64 size;
+    int status;
+  };
+  
+  class SvTcpServer;
+  class SvTcpClient;
 
-class SvTcpServer : public QObject
+}
+
+class svtcp::SvTcpServer : public QObject
 {
     Q_OBJECT
 
@@ -39,11 +62,14 @@ class SvTcpServer : public QObject
     quint16     nextBlockSize = 0;
     void sendToClient(QTcpSocket* pSocket, const QString& str);
   
+    svlog::SvLog _log;
+    
   public:
 
     quint16 port = 35580;
     
-    SvTcpServer(quint16 port = 35580,
+    SvTcpServer(svlog::SvLog &log,
+                quint16 port = 35580,
                    bool runServer = false,
                    QObject *parent = 0,
                    bool logRequestData = true,
@@ -86,67 +112,70 @@ class SvTcpServer : public QObject
     
 };
 
-class SvTcpClient : public QObject
+class svtcp::SvTcpClient : public QObject
 {
     Q_OBJECT
 
-  private:
-    quint16     nextBlockSize = 0;
-
   public:
-    quint16 port;
-    QString ip;    
-    
-    SvTcpClient(svlog::SvLog &log,
-                QString ip = "",
-                quint16 port = 35580,
+    SvTcpClient(svlog::SvLog &log, 
+                QString ip = "", quint16 port = 35580,
                 QObject *parent = 0,
-                bool logRequestData = true,
-                bool showRequestDataInHex = false,
-                bool logResponseData = true,
-                bool showResponseDataInHex = false,
-                bool advancedStream = false,
-                int streamVersion = QDataStream::Qt_5_2);
+                int flags = svtcp::LogInData | svtcp::LogOutData);
     
-    QTcpSocket* socket;
-    bool connected = false;
+    void setLog(svlog::SvLog &log) { _log = log; }
     
-    QByteArray responseData = 0;
-    quint64 responseSize = 0;
-    int responseStatus = -1;
+    void setIp(QString ip) { _ip = ip; }
+    void setPort(quint16 port) { _port = port; }
+    void setFlags(int flags) { _log_flags = flags; }
     
-    virtual int connectToHost();
-    virtual void disconnectFromHost();
+    svtcp::SocketErrors connectToHost();
+    void disconnectFromHost();
     
-    bool advancedStream = false;
-    int streamVersion = QDataStream::Qt_5_2;
-//    bool showSymbols = true;
+    void sendData(const QByteArray &data, int msecWaitForAnswer = svtcp::DontWait);
+    void sendData(QString text, int msecWaitForAnswer = svtcp::DontWait);
     
-    bool logRequestData = true;
-    bool showRequestDataInHex = false;
-    bool logResponseData = true;
-    bool showResponseDataInHex = false;
-//    bool log_requests = true;
-//    bool log_responses = true;
+//    void simpleSendData(QString text);
     
+    bool connected() { return _connected; }
+    const svtcp::Response *response() { return &_response; }
     
-    virtual void sendData(QByteArray* data, int msecWaitForAnswer = dontWait, QObject *parent = 0);
-    virtual void sendData(QString text, int msecWaitForAnswer = dontWait, QObject* parent = 0);
-    
-    void simpleSendData(QString text);
+    QString lastError() { return _lastError; }
     
     /* для отладки таймера */
-    virtual void sendData(int msecWaitForAnswer);
+    void sendData(int msecWaitForAnswer);
     
+private:
+  QObject *_parent = nullptr;
+  
+  QString _ip = "";
+  quint16 _port = 35580;
+    
+  quint16  _nextBlockSize = 0;
+  
+  QTcpSocket* _socket;
+  bool _connected = false;
+  
+  svtcp::Response _response;
+  
+//  QByteArray _responseData = 0;
+//  quint64 _responseSize = 0;
+//  int _responseStatus = -1;
+  
+  svlog::SvLog _log;
+  int _log_flags = svtcp::LogInData | svtcp::LogOutData;
+    
+  QString _lastError = "";
+  
   signals:
-    virtual void sigGotNewData();
+    void newData();
   
   private slots:
-      virtual void slotReadyRead();
-      virtual void slotSocketError(QAbstractSocket::SocketError);
-      virtual void slotStateChanged(QAbstractSocket::SocketState state);
+      void readyRead();
+      void socketError(QAbstractSocket::SocketError);
+      void stateChanged(QAbstractSocket::SocketState state);
 
 };
+
 
 #endif // SV_TCPSERVERCLIENT_H
 
