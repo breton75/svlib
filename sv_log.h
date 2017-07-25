@@ -187,15 +187,41 @@ public:
     return *this;
   }
   
-//  QTextStream &operator<< (float f);
+//  svlog::SvLog &operator<< (float f) {
+//    _current_line += QString::number(f);
+//    _current_line += _separator;
+//    return *this;
+//  }
   
-//  QTextStream &operator<< (double f);
+//  svlog::SvLog &operator<< (double f) {
+//    _current_line += QString::number(f);
+//    _current_line += _separator;
+//    return *this;
+//  }
   
-//  QTextStream &operator<< (char ch);
+  svlog::SvLog &operator<< (qreal f) {
+    _current_line += QString::number(f);
+    _current_line += _separator;
+    return *this;
+  }
   
-//  QTextStream &operator<< (signed int i);
+  svlog::SvLog &operator<< (char ch) {
+    _current_line += ch;
+    _current_line += _separator;
+    return *this;
+  }
   
-//  QTextStream &operator<< (unsigned int i);
+  svlog::SvLog &operator<< (signed int i) {
+    _current_line += QString::number(i);
+    _current_line += _separator;
+    return *this;
+  }
+  
+  svlog::SvLog &operator<< (unsigned int i) {
+    _current_line += QString::number(i);
+    _current_line += _separator;
+    return *this;
+  }
   
   
   

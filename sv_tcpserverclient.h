@@ -35,11 +35,11 @@ namespace svtcp {
   };
   
   enum LogDataFlags {
+    NoLog = 0,
     LogInData = 0x1,
     InDataAsHex = 0x2,
     LogOutData = 0x4,
     OutDataAsHex = 0x8,
-    LogInOutData = 0x5
   };
   
   struct Response {
@@ -117,16 +117,17 @@ class svtcp::SvTcpClient : public QObject
     Q_OBJECT
 
   public:
-    SvTcpClient(svlog::SvLog &log, 
-                QString ip = "", quint16 port = 35580,
-                QObject *parent = 0,
-                int flags = svtcp::LogInData | svtcp::LogOutData);
+    SvTcpClient(QString ip = "", quint16 port = 35580,
+                QTextEdit *logWidget = nullptr,
+                int flags = svtcp::LogInData | svtcp::LogOutData,
+                QObject *parent = nullptr);
     
     void setLog(svlog::SvLog &log) { _log = log; }
     
     void setIp(QString ip) { _ip = ip; }
     void setPort(quint16 port) { _port = port; }
     void setFlags(int flags) { _log_flags = flags; }
+    int logFlags() { return _log_flags; }
     
     svtcp::SocketErrors connectToHost();
     void disconnectFromHost();

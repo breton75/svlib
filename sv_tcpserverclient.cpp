@@ -306,25 +306,24 @@ void svtcp::SvTcpServer::slotSocketError(QAbstractSocket::SocketError err)
  *                      SvTcpClient                    *
  * *****************************************************/
 
-svtcp::SvTcpClient::SvTcpClient(svlog::SvLog &log,
-                                QString ip, quint16 port,
-                                QObject *parent,
-                                int flags) : 
+svtcp::SvTcpClient::SvTcpClient(QString ip, quint16 port,
+                                QTextEdit *logWidget,
+                                int flags,
+                                QObject *parent) : 
   QObject(parent)
 {
   _parent = parent;
   
   _ip = ip;
   _port = port;
-  
+  _log = svlog::SvLog(logWidget, _parent);
   _log_flags = flags;
   
   _socket = new QTcpSocket(this);
   connect(_socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
   connect(_socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(socketError(QAbstractSocket::SocketError)));
   connect(_socket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(stateChanged(QAbstractSocket::SocketState)));
-  
-  _log << svlog::Data << "dsdsdsds" << svlog::endl;
+   
 }
 
 svtcp::SocketErrors svtcp::SvTcpClient::connectToHost()
@@ -561,34 +560,37 @@ void svtcp::SvTcpClient::readyRead()
     _response.size = _response.data.size();
     
     /***** выводим лог *****/
-    if(_log_flags & svtcp::LogInData) {
+    if(_log_flags) {
       
-      QString str;
-      if(_log_flags & svtcp::InDataAsHex) {
+      if(_log_flags & svtcp::LogInData) {
         
-        for (int i = 0; i < _response.data.size(); i++) {
+        QString str;
+        if(_log_flags & svtcp::InDataAsHex) {
           
-          if(i%16 == 0) str += '\n';
-          else if(i%8 == 0) str += ' ';
-          
-          str += char2hex(_response.data.at(i), true, false, true);
-          
+          for (int i = 0; i < _response.data.size(); i++) {
+            
+            if(i%16 == 0) str += '\n';
+            else if(i%8 == 0) str += ' ';
+            
+            str += char2hex(_response.data.at(i), true, false, true);
+            
+          }
         }
-      }
-      
-      else {
         
-        for (int i = 0; i < _response.data.size(); i++)
-          str += _response.data.at(i) < 32 ? '.' : uchar(_response.data.at(i));
-
+        else {
+          
+          for (int i = 0; i < _response.data.size(); i++)
+            str += _response.data.at(i) < 32 ? '.' : uchar(_response.data.at(i));
+      
+        }
+        
+        _log << svlog::Time << svlog::Data << svlog::in << str << svlog::endl;
       }
       
-      _log << svlog::Time << svlog::Data << svlog::in << str << svlog::endl;
+      else
+        _log << svlog::Time << svlog::Data << svlog::in 
+             << QString("%1 bytes got").arg(_response.size) << svlog::endl;
     }
-    
-    else
-      _log << svlog::Time << svlog::Data << svlog::in 
-           << QString("%1 bytes got").arg(_response.size) << svlog::endl;
     
     emit newData();
   }
@@ -601,26 +603,27 @@ void svtcp::SvTcpClient::sendData(QString text, int msecWaitForAnswer)
   
   SvSecondMeter *t = nullptr;
 
+  _response.size = 0;
+  _response.data.clear();
+  
   /***** готовимся ждать ответ *****/
   if(msecWaitForAnswer != svtcp::DontWait)
   {
     t = new SvSecondMeter(msecWaitForAnswer, "Waiting for response", "Cancel", false, true, _parent);
     connect(this, SIGNAL(newData()), t, SLOT(slotDone()));
-    
-    _response.size = 0;
-    _response.data.clear();   
   }
   
   /***** отправляем данные *****/
   _socket->write(QByteArray::fromStdString(text.toStdString()));
   
   /***** выводим лог *****/
-  qDebug() << _log_flags;
-  if(_log_flags & svtcp::LogOutData)
-    _log << svlog::Time << svlog::Data << svlog::out << text << svlog::endl;
+  if(_log_flags) {
+    if(_log_flags & svtcp::LogOutData)
+      _log << svlog::Time << svlog::Data << svlog::out << text << svlog::endl;
 
-  else
-    _log << svlog::Time << svlog::Data << svlog::out << QString(" << %1 bytes sent").arg(text.length());
+    else
+      _log << svlog::Time << svlog::Data << svlog::out << QString(" << %1 bytes sent").arg(text.length());
+  }
   
   if(!t) return;
   
@@ -628,7 +631,7 @@ void svtcp::SvTcpClient::sendData(QString text, int msecWaitForAnswer)
   t->start();
   
   /*********************** ждем ответ ***********************/
-  while((t->status == SvSecondMeter::smsRunned)&&(_socket->isOpen()))
+  while((t->status == SvSecondMeter::smsRunned) && (_socket->isOpen()))
     QApplication::processEvents();
   
   if(!_socket->isOpen()) t->status = SvSecondMeter::smsUnfinished;
@@ -695,33 +698,37 @@ void svtcp::SvTcpClient::sendData(const QByteArray &data, int msecWaitForAnswer)
     
     
     /***** выводим лог *****/
-    QString str = "";
-    if(_log_flags & svtcp::LogOutData) {
-      
-      if(_log_flags & svtcp::OutDataAsHex) {
+    if(_log_flags) {
+    
+      QString str = "";
+      if(_log_flags & svtcp::LogOutData) {
         
-        for (int i = 0; i < data.size(); i++) {
+        if(_log_flags & svtcp::OutDataAsHex) {
           
-          if(i%16 == 0) str += '\n';
-          else if(i%8 == 0) str += ' ';
+          for (int i = 0; i < data.size(); i++) {
+            
+            if(i%16 == 0) str += '\n';
+            else if(i%8 == 0) str += ' ';
+            
+            str += char2hex(data.at(i), true, false, true);
+            
+          }
+        }
+        
+        else {
           
-          str += char2hex(data.at(i), true, false, true);
-          
+          for (int i=0; i < data.size(); i++)           
+             str += data.at(i) < 32 ? '.' : uchar(data.at(i));
+  
         }
       }
       
-      else {
-        
-        for (int i=0; i < data.size(); i++)           
-           str += data.at(i) < 32 ? '.' : uchar(data.at(i));
-
-      }
-    }
-    
-    else
-      str = QString("%1 bytes sent").arg(data.length());
+      else
+        str = QString("%1 bytes sent").arg(data.length());
       
-    _log << svlog::Time << svlog::Data << svlog::out << str << svlog::endl;
+      _log << svlog::Time << svlog::Data << svlog::out << str << svlog::endl;
+      
+    }
       
     if(!t) return;
     

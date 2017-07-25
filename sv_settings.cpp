@@ -11,7 +11,7 @@ AppParams::WindowParams AppParams::readWindowParams(QObject* parent, QString gro
   WindowParams result;
   
   SvSettings *sett = new SvSettings(fname, parent);
-  result.size = sett->readValue(group_name, "Size", QSize(600, 400)).toSize();
+  result.size = sett->readValue(group_name, "Size", QSize(800, 600)).toSize();
   result.position = sett->readValue(group_name, "Position", QPoint(100, 100)).toPoint();
   result.state = Qt::WindowState(sett->readValue(group_name, "WindowState", Qt::WindowNoState).toInt());
   sett->~SvSettings();
