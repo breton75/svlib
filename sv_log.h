@@ -40,6 +40,7 @@ namespace svlog
     LineN = 0,
     Date,
     Time,
+    TimeZZZ,
     endl,
     out,
     in
@@ -93,6 +94,7 @@ public:
   void setDateFormat(QString dfmt) { _date_format = dfmt; }
   QString timeFormat() { return _time_format; }
   void setTimeFormat(QString tfmt) { _time_format = tfmt; }
+  void setSeparator(QChar separator) { _separator = separator; }  
   
   svlog::MessageTypes currentMsgType() { return _current_msg_type; }
   QString currentLine() { return _current_line; }
@@ -148,6 +150,16 @@ public:
         _current_line += QTime::currentTime().toString(_time_format);
         _current_line += _separator;
         break;
+        
+      case svlog::TimeZZZ:
+      {
+        QTime t = QTime::currentTime();
+        _current_line += QString("%1.%2%3")
+                         .arg(t.toString(_time_format))
+                         .arg(t.toString("zzz"))
+                         .arg(_separator);
+        break;
+      }
         
       case svlog::endl:
 //        _current_line += '\n'; 
