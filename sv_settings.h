@@ -8,6 +8,11 @@
 #include <QTextCodec>
 #include <QSize>
 #include <QPoint>
+#include <QVariant>
+#include <QDir>
+#include <QDebug>
+
+class SvSettings;
 
 namespace AppParams
 {
@@ -18,11 +23,14 @@ namespace AppParams
     Qt::WindowState state;
   };
 
+  
   WindowParams readWindowParams(QObject* parent, QString group_name = "MAIN WINDOW", QString file_name = "");
   void saveWindowParams(QObject* parent, QSize size, QPoint position, int state, QString group_name = "MAIN WINDOW", QString file_name = "");
   
   QVariant readParam(QObject* parent, QString group_name, QString param_name, QVariant default_value = QVariant(), QString file_name = "");
   void saveParam(QObject* parent, QString group_name, QString param_name, QVariant value, QString file_name = "");
+  
+  QString checkFileName(QString fname);
   
 }
 

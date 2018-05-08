@@ -13,6 +13,9 @@
 #include <QThread>
 #include <QDebug>
 #include <QMutex>
+#include <QException>
+
+#include "sv_exception.h"
 
 struct struct_user_info
 {
@@ -53,6 +56,12 @@ class SvSQLITE : public QObject // QThread //
     
     QSqlError disconnectFromDb();
     
+//    void lock() { _mutex.lock(); }
+//    void unlock() { _mutex.unlock(); }
+    
+    bool transaction() { return db.transaction(); }
+    bool rollback() { return db.rollback(); }
+    bool commit() { return db.commit(); }
     
     void setConnectionParams(QString dbName = "",
                              QString host = "",
@@ -72,6 +81,10 @@ class SvSQLITE : public QObject // QThread //
     quint16 _port = 0;
     QString _user_name = "";
     QString _password = "";
+    
+    QMutex _mutex;
+    
+    SvException _exception;
   
   signals:
     

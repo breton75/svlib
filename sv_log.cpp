@@ -4,38 +4,40 @@
 
 QMutex logmutex;
 
-void svlog::SvLog::createLog(QMainWindow *window)
+QDockWidget *svlog::SvLog::createLog(QMainWindow *window)
 {
-  if (!window)
-    {
+  if (!window) {
+    
       _log_edit = new QTextEdit;
       _log_edit->show();
-    }
-  else 
-    {
-      QDockWidget *wDock = new QDockWidget(window);
-      wDock->setObjectName(QStringLiteral("wDock"));
-      wDock->setWindowTitle("Log");
-      wDock->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-      wDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar);
-      wDock->setMinimumSize(QSize(100, 50));
-      wDock->setMaximumSize(QSize(16635, 16635));
-      
-      QWidget *wDockContents = new QWidget();
-      wDockContents->setObjectName(QStringLiteral("wDockContents"));
-      
-      QVBoxLayout *verticalLayout = new QVBoxLayout(wDockContents);
-      verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
-      
-      _log_edit = new QTextEdit(wDockContents);
-      _log_edit->setObjectName(QStringLiteral("_log_edit"));
+  }
+  else {
+    
+    _dockWidget = new QDockWidget(window);
+    _dockWidget->setObjectName(QStringLiteral("logDockWidget"));
+    _dockWidget->setWindowTitle("Лог");
+    _dockWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+//    _dockWidget->setFeatures(QDockWidget::DockWidgetVerticalTitleBar);
+    _dockWidget->setMinimumSize(QSize(100, 50));
+    _dockWidget->setMaximumSize(QSize(16635, 16635));
+    
+    QWidget *wDockContents = new QWidget();
+    wDockContents->setObjectName(QStringLiteral("wDockContents"));
+    
+    QVBoxLayout *verticalLayout = new QVBoxLayout(wDockContents);
+    verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+    verticalLayout->setMargin(2);
+    
+    _log_edit = new QTextEdit(wDockContents);
+    _log_edit->setObjectName(QStringLiteral("_log_edit"));
+  
+    verticalLayout->addWidget(_log_edit);
+  
+    _dockWidget->setWidget(wDockContents);
+    window->addDockWidget(static_cast<Qt::DockWidgetArea>(4), _dockWidget);
 
-      verticalLayout->addWidget(_log_edit);
-
-      wDock->setWidget(wDockContents);
-      window->addDockWidget(static_cast<Qt::DockWidgetArea>(4), wDock);
-
-    }
+  }
+  
 }
 
 void svlog::SvLog::assignLog(QTextEdit *widget)

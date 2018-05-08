@@ -599,83 +599,10 @@ void svtcp::SvTcpClient::readyRead()
 
 void svtcp::SvTcpClient::sendData(QString text, int msecWaitForAnswer)
 {
-  if(!_socket->isOpen()) return;
+  QByteArray ba = QByteArray();
+  ba.append(text);
   
-  SvSecondMeter *t = nullptr;
-
-  _response.size = 0;
-  _response.data.clear();
-  
-  /***** готовимся ждать ответ *****/
-  if(msecWaitForAnswer != svtcp::DontWait)
-  {
-    t = new SvSecondMeter(msecWaitForAnswer, "Waiting for response", "Cancel", false, true, _parent);
-    connect(this, SIGNAL(newData()), t, SLOT(slotDone()));
-  }
-  
-  /***** отправляем данные *****/
-  _socket->write(QByteArray::fromStdString(text.toStdString()));
-  
-  /***** выводим лог *****/
-  if(_log_flags) {
-    if(_log_flags & svtcp::LogOutData)
-      _log << svlog::Time << svlog::Data << svlog::out << text << svlog::endl;
-
-    else
-      _log << svlog::Time << svlog::Data << svlog::out << QString(" << %1 bytes sent").arg(text.length());
-  }
-  
-  if(!t) return;
-  
-  /* запускаем таймер ожидания ответа */
-  t->start();
-  
-  /*********************** ждем ответ ***********************/
-  while((t->status == SvSecondMeter::smsRunned) && (_socket->isOpen()))
-    QApplication::processEvents();
-  
-  if(!_socket->isOpen()) t->status = SvSecondMeter::smsUnfinished;
-  
-  switch (t->status)
-  {
-    case SvSecondMeter::smsCanceled:
-//      _socket->abort();
-      
-      _log << svlog::Time << svlog::Info
-           << QString("Response awaiting was canceled by user after %1.").arg(QTime(t->current_time).toString("hh:mm:ss.zzz"))
-           << svlog::endl;
-      
-      _response.status = SOCKET_AWAITING_CANCELED;
-      _lastError = "Awaiting cancelled by user";
-      break;
-      
-    case SvSecondMeter::smsTimeout:
-//      _socket->abort();
-      
-      _log << svlog::Time << svlog::Error
-           << QString("Response awaiting timeout %1.").arg(QTime(t->current_time).toString("hh:mm:ss.zzz"))
-           << svlog::endl;
-      
-      _response.status = SOCKET_TIMEOUT;
-      _lastError = "Awaiting timeout";
-      break;
-      
-    case SvSecondMeter::smsUnfinished:
-      _log << svlog::Time << svlog::Error
-           << QString("Awaiting not finished %1.").arg(QTime(t->current_time).toString("hh:mm:ss.zzz"))
-           << svlog::endl;
-      
-      _response.status = SOCKET_CONNECTION_CLOSED;
-      _lastError = "Awaiting not finished";
-      break;
-      
-    case SvSecondMeter::smsDoneOk:
-      _response.status = SOCKET_OK;    
-      _lastError = "";
-  }
-  
-  
-  t->~SvSecondMeter();
+  sendData(ba, msecWaitForAnswer);
   
 }
  

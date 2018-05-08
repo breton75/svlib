@@ -79,9 +79,10 @@ public:
   }
   
 //  QObject *parent() { return _parent; }
+  void setTextEdit(QTextEdit *textEdit) { _log_edit = textEdit; }
   QTextEdit *logEdit() { return _log_edit; }
   
-  void createLog(QMainWindow *window = nullptr);
+  QDockWidget *createLog(QMainWindow *window = nullptr);
   void assignLog(QTextEdit *widget = nullptr);
   
   void log(svlog::MessageTypes type, QString text);
@@ -99,6 +100,7 @@ public:
   svlog::MessageTypes currentMsgType() { return _current_msg_type; }
   QString currentLine() { return _current_line; }
   
+  QDockWidget* dockWidget() { return _dockWidget; }
   
 //  svlog::SvLog *operator= (svlog::SvLog *other) {
 //    return other;
@@ -250,6 +252,8 @@ private:
   int _current_line_num = 1;
   
   QChar _separator = ' ';
+  
+  QDockWidget *_dockWidget = nullptr;
   
 };
     

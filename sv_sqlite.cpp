@@ -2,7 +2,7 @@
 //#include "log.h"
 
 SvSQLITE *SQLITE;
-QMutex mutex;
+//QMutex mutex;
 
 //int CURRENT_USER_ID = -1;
 //struct_user_info USER_INFO;
@@ -77,14 +77,16 @@ QSqlError SvSQLITE::connectToDB(QString dbName,
 
 QSqlError SvSQLITE::connectToDB()
 {
+  QSqlError result;
+  
   try
   {
-    db = QSqlDatabase::addDatabase("QSQLITE", "sqlitedb");
+    db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName(_db_name);
     
     /* ------- ловим ошибки драйвера ---------*/
-    if(!db.isValid())
-      QSqlDatabase::removeDatabase("sqlitedb");
+    if(!db.isValid()) _exception.raise(db.lastError().databaseText());
+//      QSqlDatabase::removeDatabase("sqlitedb");
 
     
 //    this->db.setDatabaseName(this->p_db_name);
@@ -96,14 +98,16 @@ QSqlError SvSQLITE::connectToDB()
     
     /* ---------- подключаемся -------------*/
     else
-      this->db.open();
+      db.open();
     
-    return this->db.lastError();
+    return db.lastError();
     
   }
-  catch(...)
+  catch(SvException &exception)
   {
-//    log(m_Err, "Error in SvPGDB");
+    result.setType(QSqlError::ConnectionError);
+    result.setDatabaseText(exception.err);
+    return result;
   }
 }
 
@@ -141,11 +145,12 @@ QSqlError SvSQLITE::execSQL(QString queryText)
     return err;
   }
   
-  mutex.lock();
+  _mutex.lock();
   QSqlQuery query = db.exec(queryText);
+
   err = query.lastError();
   query.finish();
-  mutex.unlock();
+  _mutex.unlock();
   
   return err;  
 
@@ -160,10 +165,10 @@ QSqlError SvSQLITE::execSQL(QString queryText, QSqlQuery* query)
     err.setDatabaseText("Query is empty");
     return err;
   }
-
-  mutex.lock();
+  
+  _mutex.lock();
   *query = db.exec(queryText);
-  mutex.unlock();
+  _mutex.unlock();
   
   return query->lastError();
   
