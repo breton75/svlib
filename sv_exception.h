@@ -7,10 +7,10 @@
 class SvException: public QException
 {
 public:
-    void raise(QString error) { err = error; throw *this; }
+    void raise(QString error) { this->error = error; throw *this; }
     SvException *clone() const { return new SvException(*this); }
 
-    QString err;
+    QString error;
 
 };
 

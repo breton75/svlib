@@ -42,6 +42,13 @@ namespace svtcp {
     OutDataAsHex = 0x8,
   };
   
+  enum LogMode {
+    DoNotLog,
+    LogAsIs,
+    LogAsHex,
+    LogSizeOnly
+  };
+  
   struct Response {
     QByteArray data;
     quint64 size;
@@ -59,53 +66,58 @@ class svtcp::SvTcpServer : public QObject
 
   private:
     
-    quint16     nextBlockSize = 0;
-    void sendToClient(QTcpSocket* pSocket, const QString& str);
-  
-    svlog::SvLog _log;
-    
-  public:
-
-    quint16 port = 35580;
+public:
     
     SvTcpServer(svlog::SvLog &log,
-                quint16 port = 35580,
-                   bool runServer = false,
-                   QObject *parent = 0,
-                   bool logRequestData = true,
-                   bool showRequestDataInHex = false,
-                   bool logResponseData = true,
-                   bool showResponseDataInHex = false,
-                   bool showLog = true,
-                   bool advancedStream = false,
-                   int streamVersion = QDataStream::Qt_5_2);
+                svtcp::LogMode logRequestMode = svtcp::LogAsIs,
+                svtcp::LogMode logResponseMode = svtcp::LogAsIs,
+                bool showLog = true,
+                QObject *parent = 0);
     
+    ~SvTcpServer();
     
-    QTcpServer* server;
-    bool isRunned = false;
+    void setPort(quint16 port) { _port = port; }
     
-    int startServer(quint16 port, QObject* parent = 0);
+    bool startServer(quint16 port, QObject* parent = 0);
+    bool startServer(QObject* parent = 0) { return startServer(_port, parent); }
     void stopServer();
-
-    bool advancedStream = false;
-    int streamVersion = QDataStream::Qt_5_2;
-
-    QByteArray last_message;
-    QString lastClientIp;
-    bool logRequestData = true;
-    bool showRequestDataInHex = false;
-    bool logResponseData = true;
-    bool showResponseDataInHex = false;
-    bool showLog = true;
     
-  signals:
+    QString lastError() { return _lastError; }
+    
+    void sendToClient(QTcpSocket* pSocket, const QByteArray &data);
+    void sendToAll(const QByteArray &data);
+    
+private:
+    
+    QTcpServer* _server;
+    quint16 _port = 35580;
+    
+    bool _isRunned = false;
+    
+    quint16     nextBlockSize = 0;
+  
+    svlog::SvLog _log;
+
+    QByteArray _last_message;
+    QHostAddress _lastClientIp;
+    
+    QString _lastError = "";
+    
+    svtcp::LogMode _logRequestMode = svtcp::LogAsIs;
+    svtcp::LogMode _logResponseMode = svtcp::LogAsIs;
+    
+    bool _showLog = true;
+    
+    QMap<quint64, QTcpSocket*> _connections;
+    
+signals:
     void sigGotMessage();
     void sigClientDisconnected();
     
-  private slots:
+private slots:
     void slotSocketError(QAbstractSocket::SocketError err);
   
-  public slots:
+public slots:
     void slotNewConnection();
     void slotReadClient   ();
     void slotClientDisconnected();

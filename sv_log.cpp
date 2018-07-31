@@ -56,8 +56,10 @@ void svlog::SvLog::assignLog(QTextEdit *widget)
 //void log_ns::log(int mode, QString text, QWidget *parent)
 void svlog::SvLog::log(svlog::MessageTypes type, QString text)
 {
-  if(!_log_edit)
+  if(!_log_edit) {
+    qInfo() << text;
     return;
+  }
   
   QColor color;
   

@@ -11,6 +11,10 @@
 #include <QVariant>
 #include <QDir>
 #include <QDebug>
+#include <QMainWindow>
+#include <QFileInfo>
+
+#include "sv_exception.h"
 
 class SvSettings;
 
@@ -23,6 +27,11 @@ namespace AppParams
     Qt::WindowState state;
   };
 
+  
+  QFileInfo getFileInfoFromApp(const QString& extention);
+  
+  QString saveLayout(QMainWindow *mainWindow);
+  QString loadLayout(QMainWindow *mainWindow);
   
   WindowParams readWindowParams(QObject* parent, QString group_name = "MAIN WINDOW", QString file_name = "");
   void saveWindowParams(QObject* parent, QSize size, QPoint position, int state, QString group_name = "MAIN WINDOW", QString file_name = "");

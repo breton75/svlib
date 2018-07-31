@@ -106,7 +106,7 @@ QSqlError SvSQLITE::connectToDB()
   catch(SvException &exception)
   {
     result.setType(QSqlError::ConnectionError);
-    result.setDatabaseText(exception.err);
+    result.setDatabaseText(exception.error);
     return result;
   }
 }
@@ -146,6 +146,7 @@ QSqlError SvSQLITE::execSQL(QString queryText)
   }
   
   _mutex.lock();
+      
   QSqlQuery query = db.exec(queryText);
 
   err = query.lastError();

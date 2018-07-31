@@ -78,7 +78,7 @@ QString get_folder_path(QString raw_path, svfnt::SvRE re)
 QString get_file_path(QString raw_path, QString raw_file, svfnt::SvRE re)
 {
     QString path = svfnt::get_folder_path(raw_path, re);
-    if(path.isEmpty()) return "";
+    if(path.isEmpty()) return path;
   
     QString fn = svfnt::replace_re(raw_file, re);
     

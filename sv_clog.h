@@ -1,26 +1,18 @@
-#ifndef SVLOG_H
-#define SVLOG_H
+#ifndef SVCLOG_H
+#define SVCLOG_H
 
-//#include <QSqlError>
-
-#include <QWidget> ///QWidget>
-#include <QtWidgets/QTextEdit>
-#include <QtWidgets/QMainWindow>
-#include <QtWidgets/QMessageBox>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QDockWidget>
-#include <QtWidgets/QVBoxLayout>
 
 #include <QString>
 #include <QStringList>
 #include <QDebug>
 #include <QDate>
 #include <QTime>
-#include <QtGui/QColor>
-
 #include <QMutex>
+//#include <QTextStream>
+#include <iostream>
+#include <QTextCodec>
 
-namespace svlog
+namespace clog
 {
   enum MessageTypes {
     Simple = 0,
@@ -51,24 +43,24 @@ namespace svlog
   QString bytesToText(const QByteArray* b, QString splitter = "");
   QString bytesToHex(const QByteArray* b, QString splitter = "");
 
-  class SvLog;
+  class SvCLog;
       
 }
 
-class svlog::SvLog: public QObject
+class clog::SvCLog: public QObject
 {
     Q_OBJECT
   
 public:
-  explicit SvLog(QTextEdit* logEdit = nullptr, QObject *parent = nullptr) :
+  explicit SvCLog(QObject *parent = nullptr) :
     QObject(parent)
   {
     _parent = parent;
-    _log_edit = logEdit;
+//    _log_edit = logEdit;
   }
   
   
-  SvLog(svlog::SvLog &other) :
+  SvCLog(clog::SvCLog &other) :
     QObject(other.parent())
   {
     _parent = other.parent();
@@ -79,17 +71,17 @@ public:
   }
   
 //  QObject *parent() { return _parent; }
-  void setTextEdit(QTextEdit *textEdit) { _log_edit = textEdit; }
-  QTextEdit *logEdit() { return _log_edit; }
+//  void setTextEdit(QTextEdit *textEdit) { _log_edit = textEdit; }
+//  QTextEdit *logEdit() { return _log_edit; }
   
-  QDockWidget *createLog(QMainWindow *window = nullptr);
-  void assignLog(QTextEdit *widget = nullptr);
+//  QDockWidget *createLog(QMainWindow *window = nullptr);
+//  void assignLog(QTextEdit *widget = nullptr);
   
-  void log(svlog::MessageTypes type, QString text);
+  void log(clog::MessageTypes type, QString text);
   void log() { log(_current_msg_type, _current_line); }
-  void log(svlog::MessageTypes type, QStringList list);
+  void log(clog::MessageTypes type, QStringList list);
   
-  static void log(svlog::MessageTypes type, QString text, QTextEdit *textedit);
+//  static void log(svclog::MessageTypes type, QString text, QTextEdit *textedit);
   
   QString dateFormat() { return _date_format; }
   void setDateFormat(QString dfmt) { _date_format = dfmt; }
@@ -97,20 +89,20 @@ public:
   void setTimeFormat(QString tfmt) { _time_format = tfmt; }
   void setSeparator(QChar separator) { _separator = separator; }  
   
-  svlog::MessageTypes currentMsgType() { return _current_msg_type; }
+  clog::MessageTypes currentMsgType() { return _current_msg_type; }
   QString currentLine() { return _current_line; }
   
-  QDockWidget* dockWidget() { return _dockWidget; }
+//  QDockWidget* dockWidget() { return _dockWidget; }
   
-//  svlog::SvLog *operator= (svlog::SvLog *other) {
+//  clog::SvCLog *operator= (clog::SvCLog *other) {
 //    return other;
 //  }
   
   /** два && !!! **/
-  svlog::SvLog &operator= (svlog::SvLog &&other) {
+  clog::SvCLog &operator= (clog::SvCLog &&other) {
     if(this != &other) {
       setParent(other.parent());
-      _log_edit = other.logEdit();
+//      _log_edit = other.logEdit();
       _current_line = other.currentLine();
       _current_msg_type = other.currentMsgType();
       _date_format = other.dateFormat();
@@ -120,10 +112,10 @@ public:
   }
   
   /** один & !!! **/
-  svlog::SvLog &operator= (svlog::SvLog &other) {
+  clog::SvCLog &operator= (clog::SvCLog &other) {
     if(this != &other) {
       setParent(other.parent());
-      _log_edit = other.logEdit();
+//      _log_edit = other.logEdit();
       _current_line = other.currentLine();
       _current_msg_type = other.currentMsgType();
       _date_format = other.dateFormat();
@@ -132,28 +124,28 @@ public:
     return *this;
   }
 
-  svlog::SvLog &operator<< (svlog::MessageTypes type) {
+  clog::SvCLog &operator<< (clog::MessageTypes type) {
     _current_msg_type = type; return *this;
   }
   
-  svlog::SvLog &operator<< (svlog::MessageBuns mp) {
+  clog::SvCLog &operator<< (clog::MessageBuns mp) {
     switch (mp) {
-      case svlog::LineN:
+      case clog::LineN:
         _current_line += QString::number(_current_line_num);
         _current_line += _separator;
         break;
         
-      case svlog::Date:
+      case clog::Date:
         _current_line += QDate::currentDate().toString(_date_format);
         _current_line += _separator;
         break;
         
-      case svlog::Time:
+      case clog::Time:
         _current_line += QTime::currentTime().toString(_time_format);
         _current_line += _separator;
         break;
         
-      case svlog::TimeZZZ:
+      case clog::TimeZZZ:
       {
         QTime t = QTime::currentTime();
         _current_line += QString("%1.%2%3")
@@ -163,17 +155,17 @@ public:
         break;
       }
         
-      case svlog::endl:
-//        _current_line += '\n'; 
+      case clog::endl:
+//        _current_line += ; 
         log();
         break;
 
-      case svlog::in:
+      case clog::in:
         _current_line += ">>";
         _current_line += _separator;
         break;
 
-      case svlog::out:
+      case clog::out:
         _current_line += "<<";
         _current_line += _separator;
         break;        
@@ -181,13 +173,13 @@ public:
     return *this;
   }
   
-  svlog::SvLog &operator<< (QDate date) { 
+  clog::SvCLog &operator<< (QDate date) { 
     _current_line += date.toString(_date_format);
     _current_line += _separator;
     return *this;
   }
   
-  svlog::SvLog &operator<< (QTime time) { 
+  clog::SvCLog &operator<< (QTime time) { 
     _current_line += time.toString(_time_format);
     _current_line += _separator;
     return *this;
@@ -195,43 +187,43 @@ public:
   
 //  QTextStream &operator<< (const QByteArray &array);
   
-  svlog::SvLog &operator<< (const QString &string) {
+  clog::SvCLog &operator<< (const QString &string) {
     _current_line += string;
     _current_line += _separator;
     return *this;
   }
   
-//  svlog::SvLog &operator<< (float f) {
+//  clog::SvCLog &operator<< (float f) {
 //    _current_line += QString::number(f);
 //    _current_line += _separator;
 //    return *this;
 //  }
   
-//  svlog::SvLog &operator<< (double f) {
+//  clog::SvCLog &operator<< (double f) {
 //    _current_line += QString::number(f);
 //    _current_line += _separator;
 //    return *this;
 //  }
   
-  svlog::SvLog &operator<< (qreal f) {
+  clog::SvCLog &operator<< (qreal f) {
     _current_line += QString::number(f);
     _current_line += _separator;
     return *this;
   }
   
-  svlog::SvLog &operator<< (char ch) {
+  clog::SvCLog &operator<< (char ch) {
     _current_line += ch;
     _current_line += _separator;
     return *this;
   }
   
-  svlog::SvLog &operator<< (signed int i) {
+  clog::SvCLog &operator<< (signed int i) {
     _current_line += QString::number(i);
     _current_line += _separator;
     return *this;
   }
   
-  svlog::SvLog &operator<< (unsigned int i) {
+  clog::SvCLog &operator<< (unsigned int i) {
     _current_line += QString::number(i);
     _current_line += _separator;
     return *this;
@@ -240,24 +232,25 @@ public:
   
   
 private:
-  QTextEdit* _log_edit = nullptr;
   QObject *_parent = nullptr;
+  
+//  QTextStream _cout = QTextStream(stdout);
   
   QString _date_format = "dd.MM.yyyy";
   QString _time_format = "hh:mm:ss";
   
   QString _current_line = "";
-  svlog::MessageTypes _current_msg_type = svlog::Simple;
+  clog::MessageTypes _current_msg_type = clog::Simple;
   
   int _current_line_num = 1;
   
   QChar _separator = ' ';
   
-  QDockWidget *_dockWidget = nullptr;
+  QTextCodec* _codec = QTextCodec::codecForName("CP866");
   
 };
     
 
 
 
-#endif // SVLOG_H
+#endif // SVCLOG_H

@@ -25,42 +25,36 @@ QString char2hex(char c, bool toUpper, bool add0x, bool addBlank)
  * *****************************************************/
 
 svtcp::SvTcpServer::SvTcpServer(svlog::SvLog &log,
-                         quint16 port,
-                         bool runServer,
-                         QObject *parent,
-                         bool logRequestData,
-                         bool showRequestDataInHex,
-                         bool logResponseData,
-                         bool showResponseDataInHex,
+                         LogMode logRequestMode,
+                         LogMode logResponseMode,
                          bool showLog,
-                         bool advancedStream,
-                         int streamVersion) :
+                         QObject *parent) :
   QObject(parent)
 {
   _log = log;
   
-  this->port = port;
-  this->logRequestData = logRequestData;
-  this->showRequestDataInHex = showRequestDataInHex;
-  this->logResponseData = logResponseData;
-  this->showResponseDataInHex = showResponseDataInHex;
-  this->showLog = showLog;
-  
-  this->advancedStream = advancedStream;
-  this->streamVersion = streamVersion;
-  
-  if(runServer && (this->port != 0))
-    this->startServer(this->port, parent);
+  _logRequestMode = logRequestMode;
+  _logResponseMode = logResponseMode;
+  _showLog = showLog;
  
+}
+
+svtcp::SvTcpServer::~SvTcpServer()
+{
+  stopServer();
+  deleteLater();
 }
 
 void svtcp::SvTcpServer::slotNewConnection()
 {
-  QTcpSocket* pClientSocket = this->server->nextPendingConnection();
+  QTcpSocket* pClientSocket = _server->nextPendingConnection();
+  
+  _connections.insert(quint64(pClientSocket)/*->socketDescriptor()*/, pClientSocket);
+  
   connect(pClientSocket, SIGNAL(disconnected()), this, SLOT(slotClientDisconnected()));
   connect(pClientSocket, SIGNAL(readyRead()), this, SLOT(slotReadClient()));
   
-  if(showLog)
+  if(_showLog)
     _log << svlog::Time << svlog::Info
          << QString("Connected client: %1").arg(pClientSocket->peerAddress().toString())
          << svlog::endl;
@@ -71,137 +65,153 @@ void svtcp::SvTcpServer::slotNewConnection()
 void svtcp::SvTcpServer::slotClientDisconnected()
 {
   QTcpSocket* pClientSocket = (QTcpSocket*)sender();
-  if(showLog) 
+  
+  if(_showLog) 
     _log << svlog::Time << svlog::Info
          << QString("Client %1 disconnected").arg(pClientSocket->peerAddress().toString())
          << svlog::endl;
   
+  _connections.remove(quint64(pClientSocket)); //  At(_connections.indexOf(pClientSocket));
   pClientSocket->close();
-  pClientSocket->deleteLater();
   
   emit sigClientDisconnected();
 }
 
-void svtcp::SvTcpServer::sendToClient(QTcpSocket* pSocket, const QString& str)
+void svtcp::SvTcpServer::sendToClient(QTcpSocket* pSocket, const QByteArray& data)
 {
-  QByteArray  arrBlock;
-  QString s = str;
-
-  arrBlock.append(s);
   
-  pSocket->write(arrBlock);
+  pSocket->write(data);
   
   /******** выводим в лог *********/
-  if(logResponseData)
-  {
-    if(showResponseDataInHex)
-    {
-      s = "";
-      for (int i=0; i < arrBlock.size(); i++)
-        s = s + char2hex(arrBlock.at(i));
+  if(_logResponseMode != svtcp::DoNotLog) {
+    
+    QString s = QString(data);
+    
+    switch (_logResponseMode) {
+      
+      case svtcp::LogAsIs:
+        break;
+        
+      case svtcp::LogAsHex: {
+        
+        s = "";
+        for (int i=0; i < data.size(); i++)
+          s += char2hex(data.at(i));
+        
+        break;
+      }
+        
+      case svtcp::LogSizeOnly:
+        s =  QString("%1 bytes sent").arg(data.size());
+        break;
+        
     }
     
-    if(showLog)
-      _log << svlog::Time << svlog::Info << s << svlog::endl;
-    
+    _log << svlog::Time << svlog::Info << QString(" << %1").arg(s) << svlog::endl;
+      
   }
-  else if(showLog)
-    _log << svlog::Time << svlog::Info
-         << QString(" << %1 bytes sent").arg(arrBlock.size())
-         << svlog::endl;
+  
+}
+
+void svtcp::SvTcpServer::sendToAll(const QByteArray& data)
+{
+  for(QTcpSocket* client: _connections.values()) {
+
+    sendToClient(client, data);
+//    qDebug() << data.size() << client->localPort() << client->peerPort() << client->peerAddress().toString();
+  }
 }
 
 void svtcp::SvTcpServer::slotReadClient()
 {
   QTcpSocket* pClientSocket = (QTcpSocket*)sender();
-  QString message = "";
   
-  this->last_message.clear();
+  _last_message.clear();
   
   if(pClientSocket->bytesAvailable() > 0)
-    this->last_message = pClientSocket->readAll();
+    _last_message = pClientSocket->readAll();
   
-  this->lastClientIp = pClientSocket->peerAddress().toString();
+  _lastClientIp = pClientSocket->peerAddress();
   
   /******** выводим в лог *********/
-  if(this->logRequestData & showLog)
-  {
-    message = "";
-    if(this->showRequestDataInHex)
-    {
-      for (int i=0; i < this->last_message.size(); i++)
-        message = message + char2hex(this->last_message.at(i));
-    }
-    else message.append(this->last_message);
+  if(_showLog) {
     
-    _log << svlog::Time << svlog::Info
-         << message << svlog::endl;
+    QString s = _last_message;
+    
+    switch (_logResponseMode) {
+      
+      case svtcp::LogAsIs:
+        break;
+        
+      case svtcp::LogAsHex: {
+        
+        s = "";
+        for (int i = 0; i < _last_message.size(); i++)
+          s += char2hex(_last_message.at(i));
+        
+        break;
+      }
+        
+      case svtcp::LogSizeOnly:
+        s =  QString(" << %1 bytes got").arg(_last_message.size());
+        break;
+        
+    }
+    
+    _log << svlog::Time << svlog::Info << s << svlog::endl;
+      
   }
   
-  /********** отправляем клиенту OK ************/
-//  if(this->last_message.toUpper().contains(QString("ERROR").toLatin1()))
-//  { 
-//    pClientSocket->close();
-//    pClientSocket->deleteLater();
-//  }
-//  else
-    this->sendToClient(pClientSocket, "OK");
+  sendToClient(pClientSocket, "OK");
     
-  emit this->sigGotMessage();
+  emit sigGotMessage();
   
 }
 
-int svtcp::SvTcpServer::startServer(quint16 port, QObject* parent)
+bool svtcp::SvTcpServer::startServer(quint16 port, QObject* parent)
 {
-  if(this->isRunned)
-  {
-    if(showLog)
-      _log << svlog::Time << svlog::Error
-           << "Already runned" << svlog::endl;
+  if(_isRunned)
+    return true;
+  
+  _server = new QTcpServer(parent);
+  _port = port;
+  
+  if(!_server->listen(QHostAddress::Any, _port)) {
     
-    return 0;
+    _lastError = QString("%1").arg(_server->errorString());
+    _server->close();
+    
+    return false;
   }
   
-  this->server = new QTcpServer(parent);
-  this->port = port;
-  
-  if(!this->server->listen(QHostAddress::Any, this->port))
-  {
-    _log << svlog::Time << svlog::Error << "Server not runned" << svlog::endl;
-    
-    this->server->close();
-    return 1;
-  }
-  
-  connect(this->server, SIGNAL(acceptError(QAbstractSocket::SocketError)), this, SLOT(slotSocketError(QAbstractSocket::SocketError)));
-  connect(this->server, SIGNAL(newConnection()), this, SLOT(slotNewConnection()));
+  connect(_server, QTcpServer::acceptError, this, svtcp::SvTcpServer::slotSocketError);
+  connect(_server, QTcpServer::newConnection, this, svtcp::SvTcpServer::slotNewConnection);
 
-  if(showLog) 
-    _log << svlog::Time << svlog::Info << "Server runned" << svlog::endl;
+  if(_showLog) 
+    _log << svlog::Time << svlog::Info << QString("TCP server runned (%1)").arg(_port) << svlog::endl;
   
-  return 0;
+  _isRunned = true;
+      
+  return true;
+  
 }
 
 void svtcp::SvTcpServer::stopServer()
 {
-  while(this->server->hasPendingConnections())
-  {
-    QTcpSocket* connection = this->server->nextPendingConnection();
-    connection->close();
-    connection->deleteLater();
-  }
+  _server->close();
+  delete _server;
   
-  this->server->close();
-  this->isRunned = false;
-  if(showLog) 
-    _log << svlog::Time << svlog::Info << "Server stopped" << svlog::endl;
+  _isRunned = false;
+  
+  if(_showLog) 
+    _log << svlog::Time << svlog::Info << QString("TCP server stopped (%1)").arg(_port) << svlog::endl;
 
 }
 
 void svtcp::SvTcpServer::slotSocketError(QAbstractSocket::SocketError err)
 {
-  switch (err)
-  {
+  switch (err) {
+    
     case QAbstractSocket::ConnectionRefusedError:
       _log << svlog::Time << svlog::Error << "Connection Refused Error" << svlog::endl;
       break;
@@ -763,23 +773,3 @@ void svtcp::SvTcpClient::sendData(int msecWaitForAnswer)
   t->~SvSecondMeter();
 }
 
-//void svtcp::SvTcpClient::simpleSendData(QString text)
-//{
-//  if(!this->socket->isOpen()) return;
-  
-//  QByteArray arrBlock;
-
-//  /***** отправляем данные *****/
-//  arrBlock.append(text);
-//  arrBlock.append('\n');
-//  this->socket->write(arrBlock);
-  
-//  /***** выводим лог *****/
-//  if(this->logRequestData)
-//  {
-//    log(m_Data, " << " + text);
-//  }
-//  else log(m_Data, QString(" << %1 bytes sent").arg(text.length()));
-
-  
-//}
