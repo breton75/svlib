@@ -229,7 +229,8 @@ public:
     return *this;
   }
   
-  
+public slots:
+  void write(QString& text) { log(clog::Simple, text); }
   
 private:
   QObject *_parent = nullptr;

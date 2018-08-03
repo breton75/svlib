@@ -13,30 +13,12 @@
 #include <QThread>
 #include <QDebug>
 #include <QMutex>
-#include <QException>
 
 #include "sv_exception.h"
-
-struct struct_user_info
-{
-  int id;
-  int employee_id;
-  
-  bool allowAdd;
-  bool allowEdit;
-  bool allowDelete;
-  bool allowReports;
-  
-  bool viewDevices;
-  bool viewEmployees;
-  bool viewUsers;
-};
 
 class SvSQLITE : public QObject // QThread //
 {
     Q_OBJECT
-    
-//    void run() Q_DECL_OVERRIDE;
     
   public:
     SvSQLITE(QObject *parent = 0, QString fileName = "");
@@ -56,18 +38,17 @@ class SvSQLITE : public QObject // QThread //
     
     QSqlError disconnectFromDb();
     
-//    void lock() { _mutex.lock(); }
-//    void unlock() { _mutex.unlock(); }
-    
     bool transaction() { return db.transaction(); }
     bool rollback() { return db.rollback(); }
     bool commit() { return db.commit(); }
+    
     
     void setConnectionParams(QString dbName = "",
                              QString host = "",
                              quint16 port = 0,
                              QString userName = "",
                              QString pass = "");
+    
     
     QString currentDBName()   { return _db_name; }
     QString currentHostName() { return _host_name; }
