@@ -36,9 +36,9 @@ class SvPGDB : public QObject // QThread //
     bool connected;
     
     QSqlError connectToDB(QString& dbName, QString& host, quint16 port,
-                          QString& userName, QString& pass);
+                          QString& userName, QString& pass, QString connectionName = "PGConnection");
     
-    QSqlError connectToDB();
+    QSqlError connectToDB(QString connectionName = "PGConnection");
     
     QSqlError disconnectFromDb();
     
@@ -66,6 +66,8 @@ class SvPGDB : public QObject // QThread //
     QString _user_name = "";
     QString _password = "";
     
+    QString _connection_name = "PGConnection";
+
     QMutex _mutex;
     
     QSqlError _last_error;

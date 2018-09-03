@@ -21,15 +21,18 @@ SvPGDB::SvPGDB(SvPGDB* pg, QObject *parent) :
   }
 }
 
-QSqlError SvPGDB::connectToDB()
+QSqlError SvPGDB::connectToDB(QString connectionName)
 {
-  db = QSqlDatabase::addDatabase("QPSQL", "PGConnection");
+  _connection_name = connectionName;
+
+  if(!QSqlDatabase::contains(_connection_name))
+     db = QSqlDatabase::addDatabase("QPSQL", _connection_name);
   
   /* ------- ловим ошибки драйвера ---------*/
   if(!db.isValid()) {
     
     _last_error = db.lastError();
-    QSqlDatabase::removeDatabase("PGConnection");
+    QSqlDatabase::removeDatabase(_connection_name);
     
     return _last_error;
     
@@ -43,13 +46,12 @@ QSqlError SvPGDB::connectToDB()
   
   /* ---------- подключаемся -------------*/
   db.open();
-  
   return db.lastError();
   
 }
 
 QSqlError SvPGDB::connectToDB(QString &dbName, QString &host, quint16 port,
-                              QString &userName, QString &pass)
+                              QString &userName, QString &pass, QString connectionName)
 {
   _db_name = dbName; 
   _host_name = host;
@@ -171,6 +173,7 @@ QSqlError SvPGDB::execSQL(QString queryText, QSqlQueryModel *model)
 QSqlError SvPGDB::disconnectFromDb()
 {
   db.close();
+  QSqlDatabase::removeDatabase(_connection_name);
   return db.lastError();
 }
 

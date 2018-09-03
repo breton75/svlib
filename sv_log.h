@@ -60,7 +60,7 @@ class svlog::SvLog: public QObject
     Q_OBJECT
   
 public:
-  explicit SvLog(QTextEdit* logEdit = nullptr, QObject *parent = nullptr) :
+  explicit SvLog(QTextEdit* logEdit = 0, QObject *parent = 0) :
     QObject(parent)
   {
     _parent = parent;
@@ -82,8 +82,8 @@ public:
   void setTextEdit(QTextEdit *textEdit) { _log_edit = textEdit; }
   QTextEdit *logEdit() { return _log_edit; }
   
-  QDockWidget *createLog(QMainWindow *window = nullptr);
-  void assignLog(QTextEdit *widget = nullptr);
+  QDockWidget *createLog(QMainWindow *window = Q_NULLPTR);
+  void assignLog(QTextEdit *widget = Q_NULLPTR);
   
   void log(svlog::MessageTypes type, QString text);
   void log() { log(_current_msg_type, _current_line); }
@@ -107,17 +107,17 @@ public:
 //  }
   
   /** два && !!! **/
-  svlog::SvLog &operator= (svlog::SvLog &&other) {
-    if(this != &other) {
-      setParent(other.parent());
-      _log_edit = other.logEdit();
-      _current_line = other.currentLine();
-      _current_msg_type = other.currentMsgType();
-      _date_format = other.dateFormat();
-      _time_format = other.timeFormat();
-    }
-    return *this;
-  }
+//  svlog::SvLog &operator= (svlog::SvLog &&other) {
+//    if(this != &other) {
+//      setParent(other.parent());
+//      _log_edit = other.logEdit();
+//      _current_line = other.currentLine();
+//      _current_msg_type = other.currentMsgType();
+//      _date_format = other.dateFormat();
+//      _time_format = other.timeFormat();
+//    }
+//    return *this;
+//  }
   
   /** один & !!! **/
   svlog::SvLog &operator= (svlog::SvLog &other) {
@@ -240,8 +240,8 @@ public:
   
   
 private:
-  QTextEdit* _log_edit = nullptr;
-  QObject *_parent = nullptr;
+  QTextEdit* _log_edit = Q_NULLPTR;
+  QObject *_parent = Q_NULLPTR;
   
   QString _date_format = "dd.MM.yyyy";
   QString _time_format = "hh:mm:ss";
@@ -253,7 +253,7 @@ private:
   
   QChar _separator = ' ';
   
-  QDockWidget *_dockWidget = nullptr;
+  QDockWidget *_dockWidget = Q_NULLPTR;
   
 };
     

@@ -1,6 +1,6 @@
 #include "sv_settings.h"
 
-QString AppParams::saveLayout(QMainWindow *mainWindow) 
+QString AppParams::saveLayout(QMainWindow *mainWindow)
 {
   SvException except;
   QFile file;
@@ -24,6 +24,44 @@ QString AppParams::saveLayout(QMainWindow *mainWindow)
       except.raise(QString("Ошибка записи в файл %1: %2").arg(fi.fileName()).arg(file.errorString()));
     
     if(file.write(layout_data) != layout_data.size())
+      except.raise(QString("Ошибка записи в файл %1: %2").arg(fi.fileName()).arg(file.errorString()));
+    
+    file.close();
+    
+  }
+  
+  catch(SvException& e) {
+    
+    if(file.isOpen())
+      file.close();
+    
+    result = e.error;
+    
+  }
+  
+  return result;
+}
+
+QString AppParams::saveLayoutWidget(QWidget *widget) 
+{
+  SvException except;
+  QFile file;
+  QString result = "";
+  
+  try {
+    
+    QFileInfo fi = QFileInfo(QString("%1.layout").arg(widget->accessibleName()));
+    file.setFileName(fi.absoluteFilePath());
+    
+    if (!file.open(QFile::WriteOnly)) 
+      except.raise(QString("Ошибка при открытии файла %1: %2").arg(fi.fileName()).arg(file.errorString()));
+    
+    QByteArray geometry_data = widget->saveGeometry();
+    
+    if(!file.putChar((uchar)geometry_data.size()))
+      except.raise(QString("Ошибка записи в файл %1: %2").arg(fi.fileName()).arg(file.errorString()));
+      
+    if(file.write(geometry_data) != geometry_data.size())
       except.raise(QString("Ошибка записи в файл %1: %2").arg(fi.fileName()).arg(file.errorString()));
     
     file.close();
@@ -99,6 +137,54 @@ QString AppParams::loadLayout(QMainWindow *mainWindow)
   return result;
 }
 
+QString AppParams::loadLayoutWidget(QWidget *widget)
+{
+  SvException except;
+  QFile file;
+  QString result = "";
+  
+  try {
+    
+    QFileInfo fi = QFileInfo(QString("%1.layout").arg(widget->accessibleName()));
+    file.setFileName(fi.absoluteFilePath());
+    
+    if(!fi.exists())
+      except.raise(QString("Файл %1 не найден. Будет создан новый.").arg(fi.fileName()));
+    
+    if (!file.open(QFile::ReadOnly)) 
+      except.raise(QString("Ошибка при открытии файла %1: %2").arg(fi.fileName()).arg(file.errorString()));
+    
+    uchar geometry_size;
+    QByteArray geometry_data;
+ 
+    if(!file.getChar((char*)&geometry_size))
+      except.raise(QString("Ошибка чтения из файла %1: %2").arg(fi.fileName()).arg(file.errorString()));
+      
+    geometry_data = file.read(geometry_size);
+    
+    if(geometry_data.size() != geometry_size)
+      except.raise(QString("Неверный размер данных в файле %1. Ожидалось %2, прочитано %3")
+                   .arg(fi.fileName())
+                   .arg(geometry_size)
+                   .arg(geometry_data.size()));
+   
+    widget->restoreGeometry(geometry_data);
+    
+    file.close();
+    
+  }
+  
+  catch(SvException& e) {
+    
+    if(file.isOpen())
+      file.close();
+    
+    result = e.error;
+    
+  }
+  
+  return result;
+}
 
 AppParams::WindowParams AppParams::readWindowParams(QObject* parent, QString group_name, QString file_name)
 {

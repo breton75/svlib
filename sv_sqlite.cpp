@@ -14,14 +14,12 @@ SvSQLITE *SQLITE;
 SvSQLITE::SvSQLITE(QObject *parent, QString fileName) :
   QObject(parent)
 {
-  this->setParent(parent);
   _db_name = fileName;
 }
 
 SvSQLITE::SvSQLITE(SvSQLITE* sqlite, QObject *parent) :
   QObject(parent)
 {
-  setParent(parent);
   
   if(sqlite)
   {
@@ -45,7 +43,7 @@ QSqlError SvSQLITE::connectToDB(QString dbName,
     db.setDatabaseName(_db_name);
     
     /* ------- ловим ошибки драйвера ---------*/
-    if(!this->db.isValid())
+    if(!db.isValid())
       QSqlDatabase::removeDatabase("sqlitedb");
 
     /* ------- назначаем параметры подключения ---------*/
@@ -175,6 +173,20 @@ QSqlError SvSQLITE::execSQL(QString queryText, QSqlQuery* query)
   
 }
 
+//QSqlError SvSQLITE::execSQLWithTransaction(QString queryText)
+//{
+//  QSqlError serr;
+  
+//  if(!db.transaction()) {
+//    serr = db.lastError();
+//    return;
+//  }
+  
+//  serr = execSQL(queryText);
+  
+//  db.    
+  
+//}
 
 QSqlError SvSQLITE::disconnectFromDb()
 {

@@ -1,7 +1,7 @@
 #ifndef SVSETTINGS_H
 #define SVSETTINGS_H
 
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include <QObject>
 #include <QSettings>
 #include <QString>
@@ -11,7 +11,7 @@
 #include <QVariant>
 #include <QDir>
 #include <QDebug>
-#include <QMainWindow>
+#include <QtWidgets/QMainWindow>
 #include <QFileInfo>
 
 #include "sv_exception.h"
@@ -32,6 +32,9 @@ namespace AppParams
   
   QString saveLayout(QMainWindow *mainWindow);
   QString loadLayout(QMainWindow *mainWindow);
+  
+  QString saveLayoutWidget(QWidget *widget);
+  QString loadLayoutWidget(QWidget *widget);
   
   WindowParams readWindowParams(QObject* parent, QString group_name = "MAIN WINDOW", QString file_name = "");
   void saveWindowParams(QObject* parent, QSize size, QPoint position, int state, QString group_name = "MAIN WINDOW", QString file_name = "");

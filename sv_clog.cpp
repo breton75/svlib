@@ -7,13 +7,22 @@ QMutex logmutex;
   
 void clog::SvCLog::log(clog::MessageTypes type, QString text)
 {
-  QByteArray encodedString = _codec->fromUnicode(text);
-  std::cout << encodedString.data() << std::endl;
-  
+//#if !defined (Q_OS_WIN)
+//  QTextCodec* codec = QTextCodec::codecForName("CP866");
+//  QByteArray encodedString(text.toUtf8());
+////  encodedString = codec->fromUnicode(text.toUtf8());
+////  std::cout << encodedString.toStdString()/*.data()*/ << std::endl;
+//  std::cout << encodedString.data() << std::endl;
+//#else
 //  std::cout << text.toStdString() << std::endl;
-  
+//#endif
+
+  QTextStream stream(stdout);
+  stream << QString(text) << '\n';
+
   _current_line_num++;
   _current_line = "";
+  
 }
 
 void clog::SvCLog::log(clog::MessageTypes type, QStringList list)

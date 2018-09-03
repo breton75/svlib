@@ -57,6 +57,7 @@ public:
   {
     _parent = parent;
 //    _log_edit = logEdit;
+
   }
   
   
@@ -229,8 +230,14 @@ public:
     return *this;
   }
   
+  clog::SvCLog &operator<< (long long unsigned int i) {
+    _current_line += QString::number(i);
+    _current_line += _separator;
+    return *this;
+  }
+  
 public slots:
-  void write(QString& text) { log(clog::Simple, text); }
+  void write(QString text) { log(clog::Simple, text); }
   
 private:
   QObject *_parent = nullptr;
@@ -247,7 +254,12 @@ private:
   
   QChar _separator = ' ';
   
-  QTextCodec* _codec = QTextCodec::codecForName("CP866");
+ 
+//#if defined (Q_OS_WIN)
+//  QTextCodec *codec;
+//#endif
+  
+  
   
 };
     
