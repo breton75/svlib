@@ -5,7 +5,7 @@
 QMutex logmutex;
 
   
-void clog::SvCLog::log(clog::MessageTypes type, QString text)
+void clog::SvCLog::log(clog::MessageTypes type, QString text, bool newline)
 {
 //#if !defined (Q_OS_WIN)
 //  QTextCodec* codec = QTextCodec::codecForName("CP866");
@@ -18,9 +18,13 @@ void clog::SvCLog::log(clog::MessageTypes type, QString text)
 //#endif
 
   QTextStream stream(stdout);
-  stream << QString(text) << '\n';
+  stream << QString(text); // << (newline ? '\n' : '');
 
-  _current_line_num++;
+  if(newline) {
+    stream << '\n';
+    _current_line_num++;
+  }
+
   _current_line = "";
   
 }

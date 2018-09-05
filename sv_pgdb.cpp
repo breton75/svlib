@@ -173,7 +173,7 @@ QSqlError SvPGDB::execSQL(QString queryText, QSqlQueryModel *model)
 QSqlError SvPGDB::disconnectFromDb()
 {
   db.close();
-  QSqlDatabase::removeDatabase(_connection_name);
+//  QSqlDatabase::removeDatabase(_connection_name);
   return db.lastError();
 }
 

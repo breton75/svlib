@@ -34,6 +34,7 @@ namespace clog
     Time,
     TimeZZZ,
     endl,
+    endi,
     out,
     in
   };
@@ -78,8 +79,8 @@ public:
 //  QDockWidget *createLog(QMainWindow *window = nullptr);
 //  void assignLog(QTextEdit *widget = nullptr);
   
-  void log(clog::MessageTypes type, QString text);
-  void log() { log(_current_msg_type, _current_line); }
+  void log(clog::MessageTypes type, QString text, bool newline = true);
+  void log(bool newline = true) { log(_current_msg_type, _current_line, newline); }
   void log(clog::MessageTypes type, QStringList list);
   
 //  static void log(svclog::MessageTypes type, QString text, QTextEdit *textedit);
@@ -157,9 +158,12 @@ public:
       }
         
       case clog::endl:
-//        _current_line += ; 
         log();
         break;
+
+    case clog::endi:
+      log(false);
+      break;
 
       case clog::in:
         _current_line += ">>";
