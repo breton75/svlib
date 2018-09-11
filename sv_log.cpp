@@ -102,6 +102,7 @@ void svlog::SvLog::log(svlog::MessageTypes type, QString text)
         break;
       
     case svlog::Success:
+    case svlog::SuccessWithMsg:
         color = QColor(0x0020A230);
         break;
       
@@ -124,6 +125,8 @@ void svlog::SvLog::log(svlog::MessageTypes type, QString text)
   if(type == svlog::Critical)
     QMessageBox::critical(0, "Error", text, QMessageBox::Ok);
   
+  if(type == svlog::SuccessWithMsg)
+    QMessageBox::information(0, "Success", text, QMessageBox::Ok);  
 }
 
 //void log_ns::log(int mode, QStringList list, QWidget *parent)

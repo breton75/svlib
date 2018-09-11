@@ -33,7 +33,8 @@ namespace svlog
     Fail,
     Debug,
     Success,
-    Critical
+    Critical,
+    SuccessWithMsg
   };
   
   enum MessageBuns {

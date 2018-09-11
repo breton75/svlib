@@ -50,8 +50,8 @@ QSqlError SvPGDB::connectToDB(QString connectionName)
   
 }
 
-QSqlError SvPGDB::connectToDB(QString &dbName, QString &host, quint16 port,
-                              QString &userName, QString &pass, QString connectionName)
+QSqlError SvPGDB::connectToDB(QString dbName, QString host, quint16 port,
+                              QString userName, QString pass, QString connectionName)
 {
   _db_name = dbName; 
   _host_name = host;
@@ -59,7 +59,7 @@ QSqlError SvPGDB::connectToDB(QString &dbName, QString &host, quint16 port,
   _user_name = userName;
   _password = pass;
   
-  return connectToDB();
+  return connectToDB(connectionName);
 
 }
 

@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QLabel>
-
+#include <QtWidgets/QDialog>
 
 class SvBusyWindow : public QDialog
 {
