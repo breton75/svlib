@@ -326,7 +326,8 @@ svtcp::SvTcpClient::SvTcpClient(QString ip, quint16 port,
   
   _ip = ip;
   _port = port;
-  _log = svlog::SvLog(logWidget, _parent);
+//  _log = svlog::SvLog(logWidget, _parent);
+  _log.setTextEdit(logWidget);
   _log_flags = flags;
   
   _socket = new QTcpSocket(this);

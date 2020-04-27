@@ -1,6 +1,6 @@
 #include "sv_pgdb.h"
 
-SvPGDB *PGDB;
+SvPGDB *PGDB = nullptr;
 
 SvPGDB::SvPGDB(QObject *parent) :
   QObject(parent)
@@ -19,6 +19,19 @@ SvPGDB::SvPGDB(SvPGDB* pg, QObject *parent) :
     _port = pg->currentPort();
     _user_name = pg->currentUserName();
   }
+}
+
+SvPGDB* SvPGDB::instance()
+{
+    if(!PGDB)
+      PGDB = new SvPGDB();
+      
+    return PGDB;
+}
+
+void SvPGDB::free()
+{
+  delete PGDB;
 }
 
 QSqlError SvPGDB::connectToDB(QString connectionName)
@@ -69,15 +82,15 @@ SvPGDB::~SvPGDB()
   deleteLater();
 }
 
-void SvPGDB::setConnectionParams(QString &dbName, QString &host, quint16 port,
-                                 QString &userName, QString &pass)
+void SvPGDB::setConnectionParams(const QString &dbName, const QString &host, const quint16 port,
+                                 const QString &userName, const QString &pass, const QString& role)
 { 
   _db_name = dbName; 
   _host_name = host;
   _port = port;
   _user_name = userName;
   _password = pass;
-
+  _role = role;
 }
 
 QSqlError SvPGDB::execSQL(QString queryText)

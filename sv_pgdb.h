@@ -32,6 +32,9 @@ class SvPGDB : public QObject // QThread //
     SvPGDB(SvPGDB* pg, QObject *parent = 0);
     ~SvPGDB();
     
+    static SvPGDB* instance();
+    static void free();
+    
     QSqlDatabase db;
     bool connected;
     
@@ -47,8 +50,8 @@ class SvPGDB : public QObject // QThread //
     bool commit() { return db.commit(); }
     
     
-    void setConnectionParams(QString &dbName, QString &host, quint16 port,
-                             QString &userName, QString &pass);
+    void setConnectionParams(const QString &dbName, const QString &host, const quint16 port,
+                             const QString &userName, const QString &pass, const QString &role);
     
     
     QString currentDBName()   { return _db_name; }
@@ -65,6 +68,7 @@ class SvPGDB : public QObject // QThread //
     quint16 _port = 0;
     QString _user_name = "";
     QString _password = "";
+    QString _role = "";
     
     QString _connection_name = "PGConnection";
 

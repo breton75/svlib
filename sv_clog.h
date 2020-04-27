@@ -1,4 +1,4 @@
-#ifndef SVCLOG_H
+﻿#ifndef SVCLOG_H
 #define SVCLOG_H
 
 
@@ -11,263 +11,137 @@
 //#include <QTextStream>
 #include <iostream>
 #include <QTextCodec>
+#include <QFile>
+#include <QDir>
+#include <QFileInfo>
+//#include <QCoreApplication>
 
-namespace clog
+#include <sys/stat.h>
+//#include <sys/types.h>
+#include <unistd.h>
+
+#include "sv_abstract_logger.h"
+#include "sv_fnt.h"
+#include "sv_exception.h"
+
+/*
+ * для консольных приложений закомментировать !
+ */
+//#define GUI_APP
+
+namespace sv
 {
-  enum MessageTypes {
-    Simple = 0,
-    Data,
-    Error,
-    Info,
-    Duty,
-    Attention,
-    NewData,
-    Fail,
-    Debug,
-    Success,
-    Critical
-  };
-  
-  enum MessageBuns {
-    LineN = 0,
-    Date,
-    Time,
-    TimeZZZ,
-    endl,
-    endi,
-    out,
-    in
-  };
-  
-//  void log_SQL_error(QSqlError error, QString noErrorMsg = "OK");
-  
-  QString bytesToText(const QByteArray* b, QString splitter = "");
-  QString bytesToHex(const QByteArray* b, QString splitter = "");
 
-  class SvCLog;
-      
+  class SvFileLogger;
+
+  class SvConcoleLogger;
+#ifdef GUI_APP
+  class SvWidgetLogger;
+#endif
 }
 
-class clog::SvCLog: public QObject
+
+
+class sv::SvFileLogger: public sv::SvAbstarctLogger {
+
+  Q_OBJECT
+
+  QString p_file_name_prefix = "";
+
+  FILE* p_log_file = nullptr;
+  svfnt::SvRE p_re;
+  QTime p_file_time_watcher;
+  QFileInfo p_file_size_watcher;
+
+  QString _last_error = "";
+
+public:
+  explicit SvFileLogger(const sv::log::Options options = sv::log::Options(),
+                     const sv::log::Flags flags = sv::log::lfNone,
+                     QObject *parent = nullptr):
+    sv::SvAbstarctLogger(options, flags, parent)
+  {
+
+  }
+
+  void log(sv::log::Level level, log::MessageTypes type, const QString& text, bool newline = true);
+
+  bool checkFile();
+
+  void setFileNamePrefix(const QString& prefix) { p_file_name_prefix = prefix; }
+
+};
+
+class sv::SvConcoleLogger: public SvAbstarctLogger {
+
+  Q_OBJECT
+
+public:
+  explicit SvConcoleLogger(const sv::log::Options options = sv::log::Options(),
+                           const sv::log::Flags flags = sv::log::lfNone,
+                           QObject *parent = nullptr):
+    sv::SvAbstarctLogger(options, flags, parent)
+  {
+
+  }
+
+  void log(sv::log::Level level, log::MessageTypes type, const QString& text, bool newline = true);
+
+};
+
+#ifdef GUI_APP
+
+#include <QtWidgets/QTextEdit>
+#include <QtWidgets/QDockWidget>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QMessageBox>
+
+
+class sv::SvWidgetLogger: public sv::SvAbstarctLogger
 {
     Q_OBJECT
-  
+
+  QTextEdit* _log_edit = nullptr;
+  QDockWidget *_dockWidget = Q_NULLPTR;
+
+
+
+  QMap<sv::log::MessageTypes, QColor> typesColors = {{sv::log::mtSimple,    Qt::black         },
+                                                     {sv::log::mtData,      QColor(223344)    },
+                                                     {sv::log::mtError,     Qt::red           },
+                                                     {sv::log::mtInfo,      QColor(0x009A8832)},
+                                                     {sv::log::mtDuty,      QColor(0x003A6098)},
+                                                     {sv::log::mtAttention, Qt::darkMagenta   },
+                                                     {sv::log::mtNewData,   QColor(0x00BD6311)},
+                                                     {sv::log::mtFail,      QColor(0x00173EF4)},
+                                                     {sv::log::mtDebug,     QColor(0x008A8A8A)},
+                                                     {sv::log::mtSuccess,   QColor(0x0020A230)},
+                                                     {sv::log::mtCritical,  Qt::red           }};
+
 public:
-  explicit SvCLog(QObject *parent = nullptr) :
-    QObject(parent)
+  explicit SvWidgetLogger(const sv::log::Options options = sv::log::Options(),
+                          QTextEdit* logEdit = 0,
+                          const sv::log::Flags flags = sv::log::lfNone,
+                          QObject *parent = nullptr):
+    sv::SvAbstarctLogger(options, flags, parent),
+    _log_edit(logEdit)
   {
-    _parent = parent;
-//    _log_edit = logEdit;
 
   }
-  
-  
-  SvCLog(clog::SvCLog &other) :
-    QObject(other.parent())
-  {
-    _parent = other.parent();
-    _current_line = other.currentLine();
-    _current_msg_type = other.currentMsgType();
-    _date_format = other.dateFormat();
-    _time_format = other.timeFormat();
-  }
-  
-//  QObject *parent() { return _parent; }
-//  void setTextEdit(QTextEdit *textEdit) { _log_edit = textEdit; }
-//  QTextEdit *logEdit() { return _log_edit; }
-  
-//  QDockWidget *createLog(QMainWindow *window = nullptr);
-//  void assignLog(QTextEdit *widget = nullptr);
-  
-  void log(clog::MessageTypes type, QString text, bool newline = true);
-  void log(bool newline = true) { log(_current_msg_type, _current_line, newline); }
-  void log(clog::MessageTypes type, QStringList list);
-  
-//  static void log(svclog::MessageTypes type, QString text, QTextEdit *textedit);
-  
-  QString dateFormat() { return _date_format; }
-  void setDateFormat(QString dfmt) { _date_format = dfmt; }
-  QString timeFormat() { return _time_format; }
-  void setTimeFormat(QString tfmt) { _time_format = tfmt; }
-  void setSeparator(QChar separator) { _separator = separator; }  
-  
-  clog::MessageTypes currentMsgType() { return _current_msg_type; }
-  QString currentLine() { return _current_line; }
-  
-//  QDockWidget* dockWidget() { return _dockWidget; }
-  
-//  clog::SvCLog *operator= (clog::SvCLog *other) {
-//    return other;
-//  }
-  
-  /** два && !!! **/
-  clog::SvCLog &operator= (clog::SvCLog &&other) {
-    if(this != &other) {
-      setParent(other.parent());
-//      _log_edit = other.logEdit();
-      _current_line = other.currentLine();
-      _current_msg_type = other.currentMsgType();
-      _date_format = other.dateFormat();
-      _time_format = other.timeFormat();
-    }
-    return *this;
-  }
-  
-  /** один & !!! **/
-  clog::SvCLog &operator= (clog::SvCLog &other) {
-    if(this != &other) {
-      setParent(other.parent());
-//      _log_edit = other.logEdit();
-      _current_line = other.currentLine();
-      _current_msg_type = other.currentMsgType();
-      _date_format = other.dateFormat();
-      _time_format = other.timeFormat();
-    }
-    return *this;
-  }
 
-  clog::SvCLog &operator<< (clog::MessageTypes type) {
-    _current_msg_type = type; return *this;
-  }
-  
-  clog::SvCLog &operator<< (clog::MessageBuns mp) {
-    switch (mp) {
-      case clog::LineN:
-        _current_line += QString::number(_current_line_num);
-        _current_line += _separator;
-        break;
-        
-      case clog::Date:
-        _current_line += QDate::currentDate().toString(_date_format);
-        _current_line += _separator;
-        break;
-        
-      case clog::Time:
-        _current_line += QTime::currentTime().toString(_time_format);
-        _current_line += _separator;
-        break;
-        
-      case clog::TimeZZZ:
-      {
-        QTime t = QTime::currentTime();
-        _current_line += QString("%1.%2%3")
-                         .arg(t.toString(_time_format))
-                         .arg(t.toString("zzz"))
-                         .arg(_separator);
-        break;
-      }
-        
-      case clog::endl:
-        log();
-        break;
+  ~SvWidgetLogger();
 
-    case clog::endi:
-      log(false);
-      break;
+  void log(sv::log::Level level, log::MessageTypes type, const QString& text, bool newline = true);
 
-      case clog::in:
-        _current_line += ">>";
-        _current_line += _separator;
-        break;
+  void setTextEdit(QTextEdit *textEdit) { _log_edit = textEdit; }
+  QTextEdit *logEdit() const { return _log_edit; }
 
-      case clog::out:
-        _current_line += "<<";
-        _current_line += _separator;
-        break;        
-    }
-    return *this;
-  }
-  
-  clog::SvCLog &operator<< (QDate date) { 
-    _current_line += date.toString(_date_format);
-    _current_line += _separator;
-    return *this;
-  }
-  
-  clog::SvCLog &operator<< (QTime time) { 
-    _current_line += time.toString(_time_format);
-    _current_line += _separator;
-    return *this;
-  }
-  
-//  QTextStream &operator<< (const QByteArray &array);
-  
-  clog::SvCLog &operator<< (const QString &string) {
-    _current_line += string;
-    _current_line += _separator;
-    return *this;
-  }
-  
-//  clog::SvCLog &operator<< (float f) {
-//    _current_line += QString::number(f);
-//    _current_line += _separator;
-//    return *this;
-//  }
-  
-//  clog::SvCLog &operator<< (double f) {
-//    _current_line += QString::number(f);
-//    _current_line += _separator;
-//    return *this;
-//  }
-  
-  clog::SvCLog &operator<< (qreal f) {
-    _current_line += QString::number(f);
-    _current_line += _separator;
-    return *this;
-  }
-  
-  clog::SvCLog &operator<< (char ch) {
-    _current_line += ch;
-    _current_line += _separator;
-    return *this;
-  }
-  
-  clog::SvCLog &operator<< (signed int i) {
-    _current_line += QString::number(i);
-    _current_line += _separator;
-    return *this;
-  }
-  
-  clog::SvCLog &operator<< (unsigned int i) {
-    _current_line += QString::number(i);
-    _current_line += _separator;
-    return *this;
-  }
-  
-  clog::SvCLog &operator<< (long long unsigned int i) {
-    _current_line += QString::number(i);
-    _current_line += _separator;
-    return *this;
-  }
-  
-public slots:
-  void write(QString text) { log(clog::Simple, text); }
-  
-private:
-  QObject *_parent = nullptr;
-  
-//  QTextStream _cout = QTextStream(stdout);
-  
-  QString _date_format = "dd.MM.yyyy";
-  QString _time_format = "hh:mm:ss";
-  
-  QString _current_line = "";
-  clog::MessageTypes _current_msg_type = clog::Simple;
-  
-  int _current_line_num = 1;
-  
-  QChar _separator = ' ';
-  
- 
-//#if defined (Q_OS_WIN)
-//  QTextCodec *codec;
-//#endif
-  
-  
-  
+  QDockWidget *createDockWidgetLog(QMainWindow *window = Q_NULLPTR, const QString& title = "", QDockWidget::DockWidgetFeature feature = QDockWidget::DockWidgetFloatable);
+  void bindTo(QTextEdit *textEdit);
+
 };
-    
-
+#endif // GUI_APP
 
 
 #endif // SVCLOG_H

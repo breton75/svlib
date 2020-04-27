@@ -46,6 +46,7 @@ namespace svlog
     out,
     in
   };
+
   
 //  void log_SQL_error(QSqlError error, QString noErrorMsg = "OK");
   
@@ -68,6 +69,12 @@ public:
     _log_edit = logEdit;
   }
   
+  
+  static SvLog& instance()
+  {
+    static SvLog log_inst;
+    return log_inst;
+  }
   
   SvLog(svlog::SvLog &other) :
     QObject(other.parent())
@@ -255,6 +262,8 @@ private:
   QChar _separator = ' ';
   
   QDockWidget *_dockWidget = Q_NULLPTR;
+  
+  QMutex _logmutex;
   
 };
     

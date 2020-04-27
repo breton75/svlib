@@ -2,7 +2,6 @@
 
 //using namespace svlog;
 
-QMutex logmutex;
 
 QDockWidget *svlog::SvLog::createLog(QMainWindow *window)
 {
@@ -112,12 +111,17 @@ void svlog::SvLog::log(svlog::MessageTypes type, QString text)
     }
   
   
-  logmutex.lock();
-  _log_edit->setTextColor(color);
-  _log_edit->append(text);
-  logmutex.unlock();
+  if(_logmutex.tryLock(3000)) {
+
+    _log_edit->setTextColor(color);
+    
+    _log_edit->append(text);
+    
+    _current_line_num++;
+    
+    _logmutex.unlock();    
+  }
   
-  _current_line_num++;
   _current_line = "";
   
   QApplication::processEvents();
@@ -126,7 +130,8 @@ void svlog::SvLog::log(svlog::MessageTypes type, QString text)
     QMessageBox::critical(0, "Error", text, QMessageBox::Ok);
   
   if(type == svlog::SuccessWithMsg)
-    QMessageBox::information(0, "Success", text, QMessageBox::Ok);  
+    QMessageBox::information(0, "Success", text, QMessageBox::Ok);
+  
 }
 
 //void log_ns::log(int mode, QStringList list, QWidget *parent)
