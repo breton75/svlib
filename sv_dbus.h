@@ -68,7 +68,7 @@ namespace sv {
 
 
 
-  class SvDBus : public SvAbstarctLogger
+  class SvDBus : public SvAbstractLogger
   {
     Q_OBJECT
 

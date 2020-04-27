@@ -10,7 +10,7 @@
 namespace sv
 {
 
-  class SvAbstarctLogger;
+  class SvAbstractLogger;
 
   namespace log
   {
@@ -161,7 +161,7 @@ namespace sv
     };
   }
 
-  class SvAbstarctLogger: public QObject
+  class SvAbstractLogger: public QObject
   {
       Q_OBJECT
 
@@ -182,7 +182,7 @@ namespace sv
     quint8 p_check_log_level_first:1;
 
   public:
-    explicit SvAbstarctLogger(const sv::log::Options options,
+    explicit SvAbstractLogger(const sv::log::Options options,
                                      const sv::log::Flags flags = sv::log::lfNone,
                                      QObject *parent = nullptr) :
       QObject(parent),
@@ -192,7 +192,7 @@ namespace sv
       setFlags(flags);
     }
 
-    SvAbstarctLogger(SvAbstarctLogger &other) :
+    SvAbstractLogger(SvAbstractLogger &other) :
       QObject(other.p_parent)
     {
       p_parent = other.p_parent;
@@ -201,7 +201,7 @@ namespace sv
     }
 
     /** два && !!! **/
-    SvAbstarctLogger &operator= (SvAbstarctLogger &&other) {
+    SvAbstractLogger  &operator= (SvAbstractLogger &&other) {
 
       if(this != &other) {
 
@@ -214,7 +214,7 @@ namespace sv
     }
 
     /** один & !!! **/
-    SvAbstarctLogger &operator= (const SvAbstarctLogger &other) {
+    SvAbstractLogger &operator= (const SvAbstractLogger &other) {
 
       if(this != &other) {
 
@@ -243,7 +243,7 @@ namespace sv
     virtual void setSeparator(QChar separator)              { p_separator = separator;          }
     virtual void setOptions(const sv::log::Options options) { p_options = options;              }
     virtual void setFlags(const sv::log::Flags flags)       { p_check_log_level_first = flags;  }
-    virtual void setSender(const QString& sender)           { p_current_sender = sender;  }
+    virtual void setSender(const QString& sender)           { p_current_sender = sender;        }
 
     virtual void resetCurrentData()
     {
@@ -254,7 +254,7 @@ namespace sv
 
 
     /** operators **/
-    sv::SvAbstarctLogger &operator<< (sv::log::MessageTypes type) {
+    sv::SvAbstractLogger &operator<< (sv::log::MessageTypes type) {
 
         if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
           return *this;
@@ -263,7 +263,7 @@ namespace sv
         return *this;
     }
 
-    sv::SvAbstarctLogger &operator<< (sv::log::Level level) {
+    sv::SvAbstractLogger &operator<< (sv::log::Level level) {
 
         if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
             return *this;
@@ -272,7 +272,7 @@ namespace sv
         return *this;
     }
 
-    sv::SvAbstarctLogger &operator<< (sv::log::MessageBuns bun) {
+    sv::SvAbstractLogger &operator<< (sv::log::MessageBuns bun) {
 
       if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
         return *this;
@@ -321,7 +321,7 @@ namespace sv
 
     }
 
-    sv::SvAbstarctLogger &operator<< (QDate date)
+    sv::SvAbstractLogger &operator<< (QDate date)
     {
 
       if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
@@ -333,7 +333,7 @@ namespace sv
 
     }
 
-    sv::SvAbstarctLogger &operator<< (QTime time)
+    sv::SvAbstractLogger &operator<< (QTime time)
     {
       if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
           return *this;
@@ -344,7 +344,7 @@ namespace sv
 
     }
 
-    sv::SvAbstarctLogger &operator<< (const QString &string)
+    sv::SvAbstractLogger &operator<< (const QString &string)
     {
       if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
           return *this;
@@ -355,7 +355,7 @@ namespace sv
 
     }
 
-    sv::SvAbstarctLogger &operator<< (qreal f)
+    sv::SvAbstractLogger &operator<< (qreal f)
     {
       if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
           return *this;
@@ -366,7 +366,7 @@ namespace sv
 
     }
 
-    sv::SvAbstarctLogger &operator<< (char ch)
+    sv::SvAbstractLogger &operator<< (char ch)
     {
       if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
           return *this;
@@ -378,7 +378,7 @@ namespace sv
 
     }
 
-    sv::SvAbstarctLogger &operator<< (signed int i)
+    sv::SvAbstractLogger &operator<< (signed int i)
     {
       if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
           return *this;
@@ -389,7 +389,7 @@ namespace sv
 
     }
 
-    sv::SvAbstarctLogger &operator<< (unsigned int i)
+    sv::SvAbstractLogger &operator<< (unsigned int i)
     {
       if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
           return *this;
@@ -400,7 +400,7 @@ namespace sv
 
     }
 
-    sv::SvAbstarctLogger &operator<< (long long unsigned int i)
+    sv::SvAbstractLogger &operator<< (long long unsigned int i)
     {
       if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
           return *this;
@@ -410,7 +410,7 @@ namespace sv
       return *this;
     }
 
-    sv::SvAbstarctLogger &operator<< (long long signed int i)
+    sv::SvAbstractLogger &operator<< (long long signed int i)
     {
       if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
           return *this;
@@ -421,7 +421,7 @@ namespace sv
 
     }
 
-    sv::SvAbstarctLogger &operator<< (sv::log::sender& sender) {
+    sv::SvAbstractLogger &operator<< (sv::log::sender& sender) {
       p_current_sender = sender;
       return *this;
     }

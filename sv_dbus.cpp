@@ -4,7 +4,7 @@
 //sv::SvDBus* sv::SvDBus::_instance = nullptr;
 
 sv::SvDBus::SvDBus(const sv::log::Options options, const sv::log::Flags flags, QObject *parent):
-  sv::SvAbstarctLogger(options, flags, parent)
+  sv::SvAbstractLogger(options, flags, parent)
 {
 //  new SvDBusAdaptor(this);
 //  QDBusConnection::sessionBus().registerObject("/", this);

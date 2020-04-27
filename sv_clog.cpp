@@ -13,7 +13,7 @@ NEW_FILE:
   if(!p_log_file) {
 
     p_re.date_time = QDateTime::currentDateTime();
-    QString fn = p_re.get_file_path(p_options.log_directory, p_options.log_filename, p_file_name_prefix);
+    QString fn = svfnt::get_file_path(p_options.log_directory, p_options.log_filename, p_re);
 
     const char* mode = p_options.log_truncate_on_rotation ? "w" : "a";
 

@@ -42,7 +42,7 @@ namespace sv
 
 
 
-class sv::SvFileLogger: public sv::SvAbstarctLogger {
+class sv::SvFileLogger: public sv::SvAbstractLogger {
 
   Q_OBJECT
 
@@ -59,7 +59,7 @@ public:
   explicit SvFileLogger(const sv::log::Options options = sv::log::Options(),
                      const sv::log::Flags flags = sv::log::lfNone,
                      QObject *parent = nullptr):
-    sv::SvAbstarctLogger(options, flags, parent)
+    sv::SvAbstractLogger(options, flags, parent)
   {
 
   }
@@ -72,7 +72,7 @@ public:
 
 };
 
-class sv::SvConcoleLogger: public SvAbstarctLogger {
+class sv::SvConcoleLogger: public SvAbstractLogger {
 
   Q_OBJECT
 
@@ -80,7 +80,7 @@ public:
   explicit SvConcoleLogger(const sv::log::Options options = sv::log::Options(),
                            const sv::log::Flags flags = sv::log::lfNone,
                            QObject *parent = nullptr):
-    sv::SvAbstarctLogger(options, flags, parent)
+    sv::SvAbstractLogger(options, flags, parent)
   {
 
   }
@@ -98,7 +98,7 @@ public:
 #include <QtWidgets/QMessageBox>
 
 
-class sv::SvWidgetLogger: public sv::SvAbstarctLogger
+class sv::SvWidgetLogger: public sv::SvAbstractLogger
 {
     Q_OBJECT
 
@@ -124,7 +124,7 @@ public:
                           QTextEdit* logEdit = 0,
                           const sv::log::Flags flags = sv::log::lfNone,
                           QObject *parent = nullptr):
-    sv::SvAbstarctLogger(options, flags, parent),
+    sv::SvAbstractLogger(options, flags, parent),
     _log_edit(logEdit)
   {
 
