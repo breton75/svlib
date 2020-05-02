@@ -64,7 +64,7 @@ namespace dev {
 
     SerialParams params() const { return _params; }
 
-    static QString getSring(const SerialParams& params)
+    static QString getString(const SerialParams& params)
     {
 
       return QString("-%1=%2 -%3=%4 -%5=%6 -%7=%8 -%9=%10 -%11=%12")
