@@ -23,11 +23,8 @@ SvConfigFileParser::SvConfigFileParser(const OptionStructList &options) : //, QO
 {
     for (int i = 0; i < _options.count(); ++i) {
 
-//        _options.append(options.at(i));
-
         _options[i].current_value = _options.at(i).default_value;
         _options[i].current_name = "";
-
 
     }
 }

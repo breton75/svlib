@@ -27,7 +27,7 @@
 /*
  * для консольных приложений закомментировать !
  */
-//#define GUI_APP
+#define GUI_APP
 
 namespace sv
 {
