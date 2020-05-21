@@ -6,10 +6,10 @@
 sv::SvDBus::SvDBus(const sv::log::Options options, const sv::log::Flags flags, QObject *parent):
   sv::SvAbstractLogger(options, flags, parent)
 {
-//  new SvDBusAdaptor(this);
-//  QDBusConnection::sessionBus().registerObject("/", this);
+  new SvDBusAdaptor(this);
+  QDBusConnection::sessionBus().registerObject("/", this);
 
-//  _iface = new OrgExampleChatInterface(QString(), QString(), QDBusConnection::sessionBus(), 0);
+  _iface = new OrgExampleChatInterface(QString(), QString(), QDBusConnection::sessionBus(), 0);
 
 }
 

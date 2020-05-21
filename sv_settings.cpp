@@ -1,5 +1,7 @@
 #include "sv_settings.h"
 
+//QSettings::Format current_format = QSettings::NativeFormat;
+
 QString AppParams::saveLayout(QMainWindow *mainWindow)
 {
   SvException except;

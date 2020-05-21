@@ -43,7 +43,7 @@ namespace AppParams
   void saveParam(QObject* parent, QString group_name, QString param_name, QVariant value, QString file_name = "");
   
   QString checkFileName(QString fname);
-  
+
 }
 
 

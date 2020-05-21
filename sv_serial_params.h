@@ -1,10 +1,20 @@
-﻿#ifndef SV_SERIAL_PARAMS
+﻿/**********************************************************************
+ *  константы и структуры для работы с последовательным портом.
+ *  форма для редактирования находится в файлах sv_serial_editor.*
+ *  ВАЖНО! решено разнести парметры и редактор по разным фалам,
+ *  чтобы не было проблемы при работе с приложениями без GUI
+ *
+ *  автор Свиридов С.А. Авиационные и Морская Электроника
+ * *********************************************************************/
+
+#ifndef SV_SERIAL_PARAMS
 #define SV_SERIAL_PARAMS
 
 #include <QtGlobal>
 #include <QtCore/QCommandLineParser>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
+
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -18,23 +28,22 @@
 #define P_SERIAL_STOPBITS "stopbits"
 #define P_SERIAL_FLOWCTRL "flowcontrol"
 
-
 namespace sv {
 
   const QList<int> Baudrates = {75, 115, 134, 150, 300, 600, 1200, 1800, 2400, 4800, 7200, 9600, 14400, 19200, 38400, 57600, 115200, 128000};
 
-  const QMap<QSerialPort::DataBits, QString>    DataBits =     {{QSerialPort::Data5, "5"},
+  const QMap<QSerialPort::DataBits, QString>    DataBits     = {{QSerialPort::Data5, "5"},
                                                                 {QSerialPort::Data6, "6"},
                                                                 {QSerialPort::Data7, "7"},
                                                                 {QSerialPort::Data8, "8"}};
 
-  const QMap<QSerialPort::Parity, QString>      Parities =     {{QSerialPort::NoParity, "Нет"},
+  const QMap<QSerialPort::Parity, QString>      Parities     = {{QSerialPort::NoParity, "Нет"},
                                                                 {QSerialPort::EvenParity, "Чет"},
                                                                 {QSerialPort::OddParity, "Нечет"},
                                                                 {QSerialPort::SpaceParity, "Пробел"},
                                                                 {QSerialPort::MarkParity, "Маркер"}};
 
-  const QMap<QSerialPort::StopBits, QString>    StopBits =     {{QSerialPort::OneStop, "1"},
+  const QMap<QSerialPort::StopBits, QString>    StopBits     = {{QSerialPort::OneStop, "1"},
                                                                 {QSerialPort::OneAndHalfStop, "1,5"},
                                                                 {QSerialPort::TwoStop, "2"}};
 
@@ -43,7 +52,7 @@ namespace sv {
                                                                 {QSerialPort::SoftwareControl, "Программное"}};
 
 
-
+  /** структура для хранения параметров последовательного порта **/
   struct SerialParams {
 
     QString                   portname    =     "ttyS0";
@@ -53,7 +62,12 @@ namespace sv {
     QSerialPort::StopBits     stopbits    =     QSerialPort::OneStop;
     QSerialPort::FlowControl  flowcontrol =     QSerialPort::NoFlowControl;
 
-    bool isValid = false;
+
+    static SerialParams fromJson(const QString& json_string)
+    {
+      QJsonDocument jd = QJsonDocument::fromJson(json_string.toUtf8());
+      return fromJsonObject(jd.object());
+    }
 
     static SerialParams fromJsonObject(const QJsonObject &object)
     {
@@ -81,23 +95,25 @@ namespace sv {
 
     }
 
-    QJsonObject getJsonObject() const
+    QJsonObject toJsonObject() const
     {
       QJsonObject j;
 
       j.insert(P_SERIAL_PORTNAME, QJsonValue(portname).toString());
-      j.insert(P_SERIAL_BAUDRATE, QJsonValue(baudrate).toInt());
-      j.insert(P_SERIAL_DATABITS, QJsonValue(databits).toInt());
-      j.insert(P_SERIAL_FLOWCTRL, QJsonValue(flowcontrol).toInt());
-      j.insert(P_SERIAL_PARITY, QJsonValue(parity).toInt());
-      j.insert(P_SERIAL_STOPBITS, QJsonValue(stopbits).toInt());
+      j.insert(P_SERIAL_BAUDRATE, QJsonValue(static_cast<int>(baudrate)).toInt());
+      j.insert(P_SERIAL_DATABITS, QJsonValue(static_cast<int>(databits)).toInt());
+      j.insert(P_SERIAL_FLOWCTRL, QJsonValue(static_cast<int>(flowcontrol)).toInt());
+      j.insert(P_SERIAL_PARITY,   QJsonValue(static_cast<int>(parity)).toInt());
+      j.insert(P_SERIAL_STOPBITS, QJsonValue(static_cast<int>(stopbits)).toInt());
 
       return j;
 
     }
-
   };
 
+
+  /** класс парсер параметров из текстовой строки вида:
+   * -параметр1 = 'текст'  -параметр2 = on  -параметр3 = 500  */
   class SerialParamsParser
   {
   public:
@@ -187,6 +203,7 @@ namespace sv {
     SvException _exception;
 
   };
+
 }
 
 #endif // SV_SERIAL_PARAMS
