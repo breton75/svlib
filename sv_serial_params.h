@@ -63,7 +63,7 @@ namespace sv {
     QSerialPort::FlowControl  flowcontrol =     QSerialPort::NoFlowControl;
 
 
-    static SerialParams fromJson(const QString& json_string)
+    static SerialParams fromJsonString(const QString& json_string)
     {
       QJsonDocument jd = QJsonDocument::fromJson(json_string.toUtf8());
       return fromJsonObject(jd.object());
@@ -93,6 +93,14 @@ namespace sv {
 
       return p;
 
+    }
+
+    QString toJsonString() const
+    {
+      QJsonDocument jd;
+      jd.setObject(toJsonObject());
+
+      return QString(jd.toJson(QJsonDocument::Indented));
     }
 
     QJsonObject toJsonObject() const

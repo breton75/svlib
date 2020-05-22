@@ -34,7 +34,7 @@ namespace sv {
     quint16 listen_port = 5300;
     quint16 remote_port = 5300;
 
-    static UdpParams fromJson(const QString& json_string)
+    static UdpParams fromJsonString(const QString& json_string)
     {
       QJsonDocument jd = QJsonDocument::fromJson(json_string.toUtf8());
       return fromJsonObject(jd.object());
@@ -57,7 +57,7 @@ namespace sv {
 
     }
 
-    QString toString() const
+    QString toJsonString() const
     {
       QJsonDocument jd;
       jd.setObject(toJsonObject());

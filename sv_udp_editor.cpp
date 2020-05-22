@@ -1,14 +1,14 @@
-#include "sv_serial_editor.h"
-#include "ui_sv_serialeditor.h"
+#include "sv_udp_editor.h"
+#include "ui_sv_udp_editor.h"
 
 using namespace sv;
 
-SerialEditor* SERIALEDITOR_UI = nullptr;
-SerialEditor* SerialEditor::_instance = nullptr;
+UdpEditor* UDPEDITOR_UI = nullptr;
+UdpEditor* UdpEditor::_instance = nullptr;
 
-SerialEditor::SerialEditor(SerialParams params, const QString& label, QWidget *parent) :
+UdpEditor::UdpEditor(UdpParams params, const QString& label, QWidget *parent) :
   QDialog(parent),
-  ui(new Ui::SvSerialEditorDialog)
+  ui(new Ui::SvUdpEditorDialog)
 {
   ui->setupUi(this);
   _params = params;
@@ -17,63 +17,23 @@ SerialEditor::SerialEditor(SerialParams params, const QString& label, QWidget *p
   
 }
 
-SerialEditor::SerialEditor(const QString& params, const QString& label, QWidget *parent) :
+UdpEditor::UdpEditor(const QString& params, const QString& label, QWidget *parent) :
   QDialog(parent),
-  ui(new Ui::SvSerialEditorDialog)
+  ui(new Ui::SvUdpEditorDialog)
 {
   ui->setupUi(this);
   
-  SerialParamsParser p(params);
-  if(!p.parse()) {
+  _params = UdpParams::fromJsonString(params);
     
-    QMessageBox::critical(this, "Ошибка", QString("%1\nБудут установлены парметры по умолчанию")
-                          .arg(p.lastError()), QMessageBox::Ok);
-    
-    _params.portname = "COM1";
-    _params.baudrate = 19200;
-    _params.stopbits = QSerialPort::TwoStop;
-    
-  }
-  else 
-    _params = p.params();
-      
   init(label);
   
 }
 
-void SerialEditor::init(const QString& label)
+void UdpEditor::init(const QString& label)
 {
-  ui->cbBaudrate->clear();
-  ui->cbDataBits->clear();
-  ui->cbParity->clear();
-  ui->cbPortName->clear();
-  ui->cbStopBits->clear();
-  ui->cbFlowControl->clear();
-  
-  for(QSerialPortInfo p: QSerialPortInfo::availablePorts())
-    ui->cbPortName->addItem(QString("%1: %2 %3").arg(p.portName()).arg(p.manufacturer()).arg(p.description()), QVariant(p.portName()));
-  
-  for(int b: Baudrates)
-    ui->cbBaudrate->addItem(QString::number(b), b);
-
-  for(QSerialPort::DataBits d: DataBits.keys())
-    ui->cbDataBits->addItem(DataBits.value(d), d);
-  
-  for(QSerialPort::Parity p: Parities.keys())
-    ui->cbParity->addItem(Parities.value(p), p);
-  
-  for(QSerialPort::StopBits s: StopBits.keys())
-    ui->cbStopBits->addItem(StopBits.value(s), s);  
-
-  for(QSerialPort::FlowControl f: FlowControls.keys())
-    ui->cbFlowControl->addItem(FlowControls.value(f), f);    
-  
-  ui->cbPortName->setCurrentIndex(ui->cbPortName->findData(_params.portname));
-  ui->cbBaudrate->setCurrentIndex(ui->cbBaudrate->findData(_params.baudrate));
-  ui->cbDataBits->setCurrentIndex(ui->cbDataBits->findData(_params.databits));
-  ui->cbFlowControl->setCurrentIndex(ui->cbFlowControl->findData(_params.flowcontrol));
-  ui->cbParity->setCurrentIndex(ui->cbParity->findData(_params.parity));
-  ui->cbStopBits->setCurrentIndex(ui->cbStopBits->findData(_params.stopbits));
+  ui->lineHost->setText(_params.host);
+  ui->spinListenPort->setValue(_params.listen_port);
+  ui->spinRemotePort->setValue(_params.remote_port);
   
   ui->lblCaption->setText(label);
     
@@ -84,38 +44,40 @@ void SerialEditor::init(const QString& label)
   
 }
 
-SerialEditor::~SerialEditor()
+UdpEditor::~UdpEditor()
 {
   delete ui;
 }
 
-void SerialEditor::accept()
+void UdpEditor::accept()
 {
-  _params.portname = ui->cbPortName->currentData().toString();
-//  _params.description = ui->cbPortName->currentText();
-  _params.baudrate = ui->cbBaudrate->currentData().toUInt();
-  _params.databits = QSerialPort::DataBits(ui->cbDataBits->currentData().toInt());
-  _params.flowcontrol = QSerialPort::FlowControl(ui->cbFlowControl->currentData().toInt());
-  _params.parity = QSerialPort::Parity(ui->cbParity->currentData().toInt());
-  _params.stopbits = QSerialPort::StopBits(ui->cbStopBits->currentData().toInt());
+  if(QHostAddress(ui->lineHost->text()).isNull())
+  {
+    QMessageBox::critical(this, "Ошибка", "Неверный адрес хоста");
+    return;
+  }
+
+  _params.host = ui->lineHost->text();
+  _params.listen_port = ui->spinListenPort->value();
+  _params.remote_port = ui->spinRemotePort->value();
   
   QDialog::accept();
     
 }
 
-int SerialEditor::showDialog(SerialParams params, const QString& label, QWidget *parent)
+int UdpEditor::showDialog(UdpParams params, const QString& label, QWidget *parent)
 {
-  _instance = new SerialEditor(params, label, parent);
+  _instance = new UdpEditor(params, label, parent);
   return  _instance->exec();
 }
 
-int SerialEditor::showDialog(const QString &params, const QString &label, QWidget *parent)
+int UdpEditor::showDialog(const QString &params, const QString &label, QWidget *parent)
 {
-  _instance = new SerialEditor(params, label, parent);
+  _instance = new UdpEditor(params, label, parent);
   return  _instance->exec();
 }
 
-void SerialEditor::deleteDialog()
+void UdpEditor::deleteDialog()
 {
   if(_instance)
     delete _instance;
@@ -124,9 +86,9 @@ void SerialEditor::deleteDialog()
   
 }
 
-SerialParams SerialEditor::params()
+UdpParams UdpEditor::params()
 {
-  SerialParams p;
+  UdpParams p;
 
   if(_instance)
     p = _instance->_params;
