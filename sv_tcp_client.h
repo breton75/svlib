@@ -9,7 +9,7 @@
 #include <QDataStream>
 #include <QHostAddress>
 
-#include "../../svlib/sv_log.h"
+#include "sv_clog.h"
 
 namespace svtcp {
 
@@ -68,7 +68,7 @@ class svtcp::SvTcpServer : public QObject
     
 public:
     
-    SvTcpServer(svlog::SvLog &log,
+    SvTcpServer(sv::SvAbstractLogger &logger,
                 svtcp::LogMode logRequestMode = svtcp::LogAsIs,
                 svtcp::LogMode logResponseMode = svtcp::LogAsIs,
                 bool showLog = true,

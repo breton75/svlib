@@ -86,6 +86,8 @@ namespace sv {
 
 //    static SvDBus& instance();
 
+    void init();
+
     void log(sv::log::Level level, log::MessageTypes type, const QString& text, bool newline = true);
 
     void sendmsg(const QString &sender, const QString& message, const QString &type);

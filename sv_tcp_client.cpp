@@ -24,14 +24,14 @@ QString char2hex(char c, bool toUpper, bool add0x, bool addBlank)
  *                    SvTcpServer                      *
  * *****************************************************/
 
-svtcp::SvTcpServer::SvTcpServer(svlog::SvLog &log,
+svtcp::SvTcpServer::SvTcpServer(sv::SvAbstractLogger &logger,
                          LogMode logRequestMode,
                          LogMode logResponseMode,
                          bool showLog,
                          QObject *parent) :
   QObject(parent)
 {
-  _log = log;
+  _log = logger;
   
   _logRequestMode = logRequestMode;
   _logResponseMode = logResponseMode;
@@ -55,9 +55,9 @@ void svtcp::SvTcpServer::slotNewConnection()
   connect(pClientSocket, SIGNAL(readyRead()), this, SLOT(slotReadClient()));
   
   if(_showLog)
-    _log << svlog::Time << svlog::Info
+    _log << sv::log::Time << sv::log::mtInfo
          << QString("Connected client: %1").arg(pClientSocket->peerAddress().toString())
-         << svlog::endl;
+         << sv::log::endl;
   
   //this->sendToClient(pClientSocket, "Connected to " + pClientSocket->localAddress().toString());
 }
@@ -67,9 +67,9 @@ void svtcp::SvTcpServer::slotClientDisconnected()
   QTcpSocket* pClientSocket = (QTcpSocket*)sender();
   
   if(_showLog) 
-    _log << svlog::Time << svlog::Info
+    _log << sv::log::Time << sv::log::mtInfo
          << QString("Client %1 disconnected").arg(pClientSocket->peerAddress().toString())
-         << svlog::endl;
+         << sv::log::endl;
   
   _connections.remove(quint64(pClientSocket)); //  At(_connections.indexOf(pClientSocket));
   pClientSocket->close();
@@ -107,7 +107,7 @@ void svtcp::SvTcpServer::sendToClient(QTcpSocket* pSocket, const QByteArray& dat
         
     }
     
-    _log << svlog::Time << svlog::Info << QString(" << %1").arg(s) << svlog::endl;
+    _log << sv::log::Time << sv::log::mtInfo << QString(" << %1").arg(s) << sv::log::endl;
       
   }
   
@@ -158,7 +158,7 @@ void svtcp::SvTcpServer::slotReadClient()
         
     }
     
-    _log << svlog::Time << svlog::Info << s << svlog::endl;
+    _log << sv::log::Time << sv::log::mtInfo << s << sv::log::endl;
       
   }
   
@@ -188,7 +188,7 @@ bool svtcp::SvTcpServer::startServer(quint16 port, QObject* parent)
   connect(_server, QTcpServer::newConnection, this, svtcp::SvTcpServer::slotNewConnection);
 
   if(_showLog) 
-    _log << svlog::Time << svlog::Info << QString("TCP server runned (%1)").arg(_port) << svlog::endl;
+    _log << sv::log::Time << sv::log::mtInfo << QString("TCP server runned (%1)").arg(_port) << sv::log::endl;
   
   _isRunned = true;
       
@@ -204,7 +204,7 @@ void svtcp::SvTcpServer::stopServer()
   _isRunned = false;
   
   if(_showLog) 
-    _log << svlog::Time << svlog::Info << QString("TCP server stopped (%1)").arg(_port) << svlog::endl;
+    _log << sv::log::Time << sv::log::mtInfo << QString("TCP server stopped (%1)").arg(_port) << sv::log::endl;
 
 }
 
@@ -213,99 +213,99 @@ void svtcp::SvTcpServer::slotSocketError(QAbstractSocket::SocketError err)
   switch (err) {
     
     case QAbstractSocket::ConnectionRefusedError:
-      _log << svlog::Time << svlog::Error << "Connection Refused Error" << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << "Connection Refused Error" << sv::log::endl;
       break;
 
     case QAbstractSocket::RemoteHostClosedError :
-      _log << svlog::Time << svlog::Error << QString("Remote Host Closed Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Remote Host Closed Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::HostNotFoundError :
-      _log << svlog::Time << svlog::Error << QString("Host Not Found Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Host Not Found Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::SocketAccessError :
-      _log << svlog::Time << svlog::Error << QString("Socket Access Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Socket Access Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::SocketResourceError :
-      _log << svlog::Time << svlog::Error << QString("Socket Resource Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Socket Resource Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::SocketTimeoutError :
-      _log << svlog::Time << svlog::Error << QString("Socket Timeout Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Socket Timeout Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::DatagramTooLargeError :
-     _log << svlog::Time << svlog::Error <<  QString("DatagramTooLargeError") << svlog::endl;
+     _log << sv::log::Time << sv::log::mtError <<  QString("DatagramTooLargeError") << sv::log::endl;
       break;
 
     case QAbstractSocket::NetworkError :
-      _log << svlog::Time << svlog::Error << QString("Network Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Network Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::AddressInUseError :
-      _log << svlog::Time << svlog::Error << QString("Address In Use Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Address In Use Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::SocketAddressNotAvailableError :
-      _log << svlog::Time << svlog::Error << QString("Socket Address Not Available Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Socket Address Not Available Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::UnsupportedSocketOperationError :
-      _log << svlog::Time << svlog::Error << QString("Unsupported Socket Operation Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Unsupported Socket Operation Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::UnfinishedSocketOperationError :
-      _log << svlog::Time << svlog::Error << QString("Unfinished Socket Operation Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Unfinished Socket Operation Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::ProxyAuthenticationRequiredError :
-      _log << svlog::Time << svlog::Error << QString("Proxy Authentication Required Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Proxy Authentication Required Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::SslHandshakeFailedError :
-      _log << svlog::Time << svlog::Error << QString("Ssl Handshake Failed Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Ssl Handshake Failed Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::ProxyConnectionRefusedError :
-      _log << svlog::Time << svlog::Error << QString("Proxy Connection Refused Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Proxy Connection Refused Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::ProxyConnectionClosedError :
-      _log << svlog::Time << svlog::Error << QString("Proxy Connection Closed Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Proxy Connection Closed Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::ProxyConnectionTimeoutError :
-      _log << svlog::Time << svlog::Error << QString("Proxy Connection Timeout Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Proxy Connection Timeout Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::ProxyNotFoundError :
-      _log << svlog::Time << svlog::Error << QString("Proxy Not Found Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Proxy Not Found Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::ProxyProtocolError :
-      _log << svlog::Time << svlog::Error << QString("Proxy Protocol Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Proxy Protocol Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::OperationError :
-      _log << svlog::Time << svlog::Error << QString("Operation Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Operation Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::SslInternalError :
-      _log << svlog::Time << svlog::Error << QString("SslInternal Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("SslInternal Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::SslInvalidUserDataError :
-      _log << svlog::Time << svlog::Error << QString("Ssl Invalid User Data Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Ssl Invalid User Data Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::TemporaryError :
-      _log << svlog::Time << svlog::Error << QString("Temporary Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Temporary Error") << sv::log::endl;
       break;
 
     case QAbstractSocket::UnknownSocketError :
-      _log << svlog::Time << svlog::Error << QString("Unknown Socket Error") << svlog::endl;
+      _log << sv::log::Time << sv::log::mtError << QString("Unknown Socket Error") << sv::log::endl;
       break;
 
   }
@@ -326,7 +326,7 @@ svtcp::SvTcpClient::SvTcpClient(QString ip, quint16 port,
   
   _ip = ip;
   _port = port;
-//  _log = svlog::SvLog(logWidget, _parent);
+//  _log = sv::log::SvLog(logWidget, _parent);
   _log.setTextEdit(logWidget);
   _log_flags = flags;
   
@@ -381,7 +381,7 @@ void svtcp::SvTcpClient::socketError(QAbstractSocket::SocketError err)
   if(!_socket->errorString().isEmpty())
     _lastError = _socket->errorString();
   
-  _log << svlog::Time << svlog::Error << _lastError << svlog::endl;
+  _log << sv::log::Time << sv::log::mtError << _lastError << sv::log::endl;
   
   switch (err)
   {
@@ -558,7 +558,7 @@ void svtcp::SvTcpClient::stateChanged(QAbstractSocket::SocketState state)
       stateString = "state ";// + QString("%1").arg(int(state)));
   }
   
-  _log << svlog::Time << svlog::Info << stateString << svlog::endl;
+  _log << sv::log::Time << sv::log::mtInfo << stateString << sv::log::endl;
   QApplication::processEvents();
   
 }
@@ -595,12 +595,12 @@ void svtcp::SvTcpClient::readyRead()
       
         }
         
-        _log << svlog::Time << svlog::Data << svlog::in << str << svlog::endl;
+        _log << sv::log::Time << sv::log::Data << sv::log::in << str << sv::log::endl;
       }
       
       else
-        _log << svlog::Time << svlog::Data << svlog::in 
-             << QString("%1 bytes got").arg(_response.size) << svlog::endl;
+        _log << sv::log::Time << sv::log::Data << sv::log::in
+             << QString("%1 bytes got").arg(_response.size) << sv::log::endl;
     }
     
     emit newData();
@@ -666,7 +666,7 @@ void svtcp::SvTcpClient::sendData(const QByteArray &data, int msecWaitForAnswer)
       else
         str = QString("%1 bytes sent").arg(data.length());
       
-      _log << svlog::Time << svlog::Data << svlog::out << str << svlog::endl;
+      _log << sv::log::Time << sv::log::Data << sv::log::out << str << sv::log::endl;
       
     }
       
@@ -683,9 +683,9 @@ void svtcp::SvTcpClient::sendData(const QByteArray &data, int msecWaitForAnswer)
       case SvSecondMeter::smsCanceled:
 //        _socket->abort();
         
-        _log << svlog::Time << svlog::Info
+        _log << sv::log::Time << sv::log::mtInfo
              << QString("Response awaiting was canceled by user at %1").arg(QTime(t->current_time).toString("hh:mm:ss.zzz"))
-             << svlog::endl;
+             << sv::log::endl;
         
         _response.status = SOCKET_AWAITING_CANCELED;
         _lastError = "Awaiting cancelled by user.";
@@ -694,19 +694,19 @@ void svtcp::SvTcpClient::sendData(const QByteArray &data, int msecWaitForAnswer)
       case SvSecondMeter::smsTimeout:
 //        _socket->abort();
         
-        _log << svlog::Time << svlog::Error
+        _log << sv::log::Time << sv::log::mtError
              << QString("Response awaiting timeout %1").arg(QTime(t->current_time).toString("hh:mm:ss.zzz"))
-             << svlog::endl;
+             << sv::log::endl;
         
         _response.status = SOCKET_TIMEOUT;
         _lastError = "Awaiting timeout.";
         break;
         
       case SvSecondMeter::smsUnfinished:
-        _log << svlog::Time << svlog::Error
+        _log << sv::log::Time << sv::log::mtError
              << QString("Awaiting not finished %1.").arg(QTime(t->current_time).toString("hh:mm:ss.zzz"))
              << t->current_time
-             << svlog::endl;
+             << sv::log::endl;
         
         _response.status = SOCKET_CONNECTION_CLOSED;
         _lastError = "Awaiting not finished.";
@@ -741,28 +741,28 @@ void svtcp::SvTcpClient::sendData(int msecWaitForAnswer)
   switch (t->status)
   {
     case SvSecondMeter::smsCanceled:
-      _log << svlog::Time << svlog::Info
+      _log << sv::log::Time << sv::log::mtInfo
            << QString("Response awaiting was canceled by user at %1")
            << t->current_time
-           << svlog::endl;
+           << sv::log::endl;
       
       _response.status = SOCKET_AWAITING_CANCELED;
       break;
       
     case SvSecondMeter::smsTimeout:
-      _log << svlog::Time << svlog::Error
+      _log << sv::log::Time << sv::log::mtError
            << QString("Response awaiting timeout %1")
            << t->current_time
-           << svlog::endl;
+           << sv::log::endl;
       
       _response.status = SOCKET_TIMEOUT;
       break;
       
     case SvSecondMeter::smsUnfinished:
-      _log << svlog::Time << svlog::Error
+      _log << sv::log::Time << sv::log::mtError
            <<  QString("Awaiting not finished %1")
            << t->current_time
-           << svlog::endl;
+           << sv::log::endl;
       
       _response.status = SOCKET_CONNECTION_CLOSED;
       break;

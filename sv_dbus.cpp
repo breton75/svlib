@@ -6,6 +6,11 @@
 sv::SvDBus::SvDBus(const sv::log::Options options, const sv::log::Flags flags, QObject *parent):
   sv::SvAbstractLogger(options, flags, parent)
 {
+
+}
+
+void sv::SvDBus::init()
+{
   new SvDBusAdaptor(this);
   QDBusConnection::sessionBus().registerObject("/", this);
 
