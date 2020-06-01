@@ -71,7 +71,10 @@ void sv::SvFileLogger::log(sv::log::Level level, sv::log::MessageTypes type, con
 {
   Q_UNUSED(type);
 
-  if(p_options.logging && (level <= p_options.log_level)) {
+  if(p_options.logging)
+  {
+    if(p_check_log_level && level > p_options.log_level)
+      return;
 
     if(!checkFile())
       std::cout << _last_error.toStdString().c_str();

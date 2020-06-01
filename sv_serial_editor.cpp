@@ -1,5 +1,5 @@
-#include "sv_serial_editor.h"
-#include "ui_sv_serialeditor.h"
+﻿#include "sv_serial_editor.h"
+#include "ui_sv_serial_editor.h"
 
 using namespace sv;
 

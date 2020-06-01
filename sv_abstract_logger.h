@@ -62,7 +62,7 @@ namespace sv
 
     enum Flags {
       lfNone = 0,
-      lfCheckLogLevelFirst = 0x01
+      lfCheckLogLevel = 0x01
     };
 
 
@@ -179,7 +179,7 @@ namespace sv
 
     QChar p_separator = ' ';
 
-    quint8 p_check_log_level_first:1;
+    quint8 p_check_log_level:1;
 
   public:
     explicit SvAbstractLogger(const sv::log::Options options,
@@ -239,11 +239,11 @@ namespace sv
 
     const QString currentLine() const                   { return p_current_line;            }
 
-
     virtual void setSeparator(QChar separator)              { p_separator = separator;          }
     virtual void setOptions(const sv::log::Options options) { p_options = options;              }
-    virtual void setFlags(const sv::log::Flags flags)       { p_check_log_level_first = flags;  }
+    virtual void setFlags(const sv::log::Flags flags)       { p_check_log_level = flags;  }
     virtual void setSender(const QString& sender)           { p_current_sender = sender;        }
+    virtual void setEnable(bool enable)                     { p_options.logging = enable;        }
 
     virtual void resetCurrentData()
     {
@@ -256,26 +256,17 @@ namespace sv
     /** operators **/
     sv::SvAbstractLogger &operator<< (sv::log::MessageTypes type) {
 
-        if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
-          return *this;
-
         p_current_msg_type = type;
         return *this;
     }
 
     sv::SvAbstractLogger &operator<< (sv::log::Level level) {
 
-        if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
-            return *this;
-
         p_current_log_lvl = level;
         return *this;
     }
 
     sv::SvAbstractLogger &operator<< (sv::log::MessageBuns bun) {
-
-      if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
-        return *this;
 
       switch (bun) {
       case sv::log::LineN:
@@ -324,9 +315,6 @@ namespace sv
     sv::SvAbstractLogger &operator<< (QDate date)
     {
 
-      if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
-          return *this;
-
       p_current_line += date.toString(p_options.date_format) + p_separator;
 
       return *this;
@@ -335,9 +323,6 @@ namespace sv
 
     sv::SvAbstractLogger &operator<< (QTime time)
     {
-      if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
-          return *this;
-
       p_current_line += QString("%1%2").arg(time.toString(p_options.time_format)).arg(p_separator);
 
       return *this;
@@ -346,9 +331,6 @@ namespace sv
 
     sv::SvAbstractLogger &operator<< (const QString &string)
     {
-      if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
-          return *this;
-
       p_current_line += string + p_separator;
 
       return *this;
@@ -357,9 +339,6 @@ namespace sv
 
     sv::SvAbstractLogger &operator<< (qreal f)
     {
-      if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
-          return *this;
-
       p_current_line += QString::number(f) + p_separator;
 
       return *this;
@@ -368,9 +347,6 @@ namespace sv
 
     sv::SvAbstractLogger &operator<< (char ch)
     {
-      if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
-          return *this;
-
       p_current_line += ch;
       p_current_line += p_separator;
 
@@ -380,9 +356,6 @@ namespace sv
 
     sv::SvAbstractLogger &operator<< (signed int i)
     {
-      if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
-          return *this;
-
       p_current_line += QString::number(i) + p_separator;
 
       return *this;
@@ -391,9 +364,6 @@ namespace sv
 
     sv::SvAbstractLogger &operator<< (unsigned int i)
     {
-      if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
-          return *this;
-
       p_current_line += QString::number(i) + p_separator;
 
       return *this;
@@ -402,9 +372,6 @@ namespace sv
 
     sv::SvAbstractLogger &operator<< (long long unsigned int i)
     {
-      if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
-          return *this;
-
       p_current_line += QString::number(i) + p_separator;
 
       return *this;
@@ -412,9 +379,6 @@ namespace sv
 
     sv::SvAbstractLogger &operator<< (long long signed int i)
     {
-      if(p_check_log_level_first && p_current_log_lvl > p_options.log_level)
-          return *this;
-
       p_current_line += QString::number(i) + p_separator;
 
       return *this;
@@ -422,8 +386,11 @@ namespace sv
     }
 
     sv::SvAbstractLogger &operator<< (sv::log::sender& sender) {
+
       p_current_sender = sender;
+
       return *this;
+
     }
   };
 

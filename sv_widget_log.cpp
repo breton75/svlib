@@ -59,12 +59,15 @@ void sv::SvWidgetLogger::bindTo(QTextEdit *widget)
 
 void sv::SvWidgetLogger::log(sv::log::Level level, sv::log::MessageTypes type, const QString &text, bool newline)
 {
-  if(p_options.logging && (level <= p_options.log_level))
+  if(p_options.logging)
   {
 
-    if(!_log_edit) {
-      qInfo() << text;
+    if(p_check_log_level && level > p_options.log_level)
       return;
+
+    if(!_log_edit) {
+        qInfo() << text;
+        return;
     }
 
     wlogmutex.lock();
@@ -81,5 +84,8 @@ void sv::SvWidgetLogger::log(sv::log::Level level, sv::log::MessageTypes type, c
       QMessageBox::critical(0, "Error", text, QMessageBox::Ok);
 
   }
+
+  resetCurrentData();
+
 }
 
