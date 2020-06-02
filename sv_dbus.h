@@ -11,6 +11,9 @@
 
 namespace sv {
 
+  class SvDBus;
+//  class sender;
+
   class SvDBusAdaptor: public QDBusAbstractAdaptor
   {
       Q_OBJECT
@@ -67,8 +70,20 @@ namespace sv {
   };
 
 
+//  SvDBus& operator<< (SvDBus& logger, const sender& sender);
 
-  class SvDBus : public SvAbstractLogger
+//  class sender
+//  {
+//    public:
+//      explicit sender(const QString& senderName): name(senderName) { }
+//      QString name;
+
+////      friend sv::SvDBus& operator<< (sv::SvDBus& logger, const sv::sender& sender);
+
+//  };
+
+
+  class SvDBus : public sv::SvAbstractLogger
   {
     Q_OBJECT
 
@@ -92,11 +107,31 @@ namespace sv {
 
     void sendmsg(const QString &sender, const QString& message, const QString &type);
 
+//    void setSender(const sv::sender& sender)   { _current_sender = sender; }
+
+//  protected:
+//    sv::SvDBus &operator<< (sv::sender& sender) override {
+//qDebug() << sender.name;
+//      _current_sender = sender;
+
+//      return *this;
+
+//    }
+
+  private:
+//    sv::sender _current_sender = sv::sender("");
 
   signals:
 
   public slots:
   };
 }
+
+
+//  sv::SvDBus& operator<< (sv::SvDBus& logger, const sv::sender& sender)
+//  {
+//    logger.setSender(sender);
+//    return logger;
+//  }
 
 #endif // SVDBUS_H

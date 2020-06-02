@@ -24,7 +24,7 @@ void sv::SvDBus::log(sv::log::Level level, sv::log::MessageTypes type, const QSt
   {
 
     QString msg = QString("%1").arg(text); //.arg(newline ? "\n" : "");
-    sendmsg(p_current_sender, msg, sv::log::typeToString(type));
+    sendmsg(p_current_sender.name, msg, sv::log::typeToString(type));
 
     if(newline)
       p_current_line_num++;
