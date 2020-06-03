@@ -11,10 +11,12 @@ namespace sv
 {
 
   class SvAbstractLogger;
-  class sender;
 
   namespace log
   {
+
+    class sender;
+
     enum MessageTypes {
       mtSimple = 0,
       mtData,
@@ -107,6 +109,7 @@ namespace sv
         bool log_truncate_on_rotation = false;
         quint32 log_rotation_age = 3600; // в секундах
         qint64 log_rotation_size = 10485760; // в байтах (10 мб)
+        QString log_sender_name = "device%1";
     };
 
     /*
@@ -153,17 +156,14 @@ namespace sv
     /* преобразует текстовое представление в тип сообщения */
     sv::log::MessageTypes stringToType(const QString& str);
 
+    class sender
+    {
+      public:
+        explicit sender(const QString senderName): name(senderName) { }
+        QString name;
+    };
+
   }
-
-  class sender //: public QObject
-  {
-    public:
-      explicit sender(const QString senderName): name(senderName) { }
-      QString name;
-
-//      friend sv::SvDBus& operator<< (sv::SvDBus& logger, const sv::sender& sender);
-
-  };
 
   class SvAbstractLogger: public QObject
   {
@@ -178,7 +178,7 @@ namespace sv
     sv::log::Level p_current_log_lvl = sv::log::DEFAULT_LOG_LEVEL;
     sv::log::Options p_options;
 
-    sv::sender p_current_sender = sv::sender("");
+    sv::log::sender p_current_sender = sv::log::sender("");
 
     int p_current_line_num = 1;
 
@@ -242,13 +242,15 @@ namespace sv
 
     }
 
-    const QString currentLine() const                   { return p_current_line;            }
+    const QString currentLine() const                       { return p_current_line;        }
 
-    virtual void setSeparator(QChar separator)              { p_separator = separator;          }
-    virtual void setOptions(const sv::log::Options options) { p_options = options;              }
-    virtual void setFlags(const sv::log::Flags flags)       { p_check_log_level = flags;  }
-    virtual void setSender(const sv::sender& sender)        { p_current_sender = sender;        }
-    virtual void setEnable(bool enable)                     { p_options.logging = enable;        }
+    virtual void setSeparator(QChar separator)              { p_separator = separator;      }
+    virtual void setOptions(const sv::log::Options options) { p_options = options;          }
+    virtual void setFlags(const sv::log::Flags flags)       { p_check_log_level = flags;    }
+    virtual void setSender(const sv::log::sender& sender)   { p_current_sender = sender;    }
+    virtual void setEnable(bool enable)                     { p_options.logging = enable;   }
+
+    virtual const sv::log::Options options() const          { return p_options;             }
 
     virtual void resetCurrentData()
     {
@@ -390,8 +392,8 @@ namespace sv
 
     }
 
-    sv::SvAbstractLogger &operator<< (sv::sender&& sender) {
-qDebug() << sender.name;
+    sv::SvAbstractLogger &operator<< (sv::log::sender&& sender) {
+
       p_current_sender = sender;
 
       return *this;

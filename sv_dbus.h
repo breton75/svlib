@@ -8,11 +8,11 @@
 #include "sv_abstract_logger.h"
 
 #define DBUS_SERVER_NAME "ame.proj12700.ksuts"
+#define DBUS_SENDER_NAME "device_%1"
 
 namespace sv {
 
   class SvDBus;
-//  class sender;
 
   class SvDBusAdaptor: public QDBusAbstractAdaptor
   {
@@ -70,27 +70,11 @@ namespace sv {
   };
 
 
-//  SvDBus& operator<< (SvDBus& logger, const sender& sender);
-
-//  class sender
-//  {
-//    public:
-//      explicit sender(const QString& senderName): name(senderName) { }
-//      QString name;
-
-////      friend sv::SvDBus& operator<< (sv::SvDBus& logger, const sv::sender& sender);
-
-//  };
-
-
   class SvDBus : public sv::SvAbstractLogger
   {
     Q_OBJECT
 
     OrgExampleChatInterface* _iface = nullptr;
-
-//    QString _current_sender = "";
-//    QString _current_type = "";
 
 //    static SvDBus* _instance;
   public:
@@ -107,31 +91,9 @@ namespace sv {
 
     void sendmsg(const QString &sender, const QString& message, const QString &type);
 
-//    void setSender(const sv::sender& sender)   { _current_sender = sender; }
-
-//  protected:
-//    sv::SvDBus &operator<< (sv::sender& sender) override {
-//qDebug() << sender.name;
-//      _current_sender = sender;
-
-//      return *this;
-
-//    }
-
-  private:
-//    sv::sender _current_sender = sv::sender("");
-
-  signals:
-
-  public slots:
   };
 }
 
 
-//  sv::SvDBus& operator<< (sv::SvDBus& logger, const sv::sender& sender)
-//  {
-//    logger.setSender(sender);
-//    return logger;
-//  }
 
 #endif // SVDBUS_H
