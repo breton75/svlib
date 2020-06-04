@@ -62,6 +62,7 @@ namespace sv {
     QSerialPort::StopBits     stopbits    =     QSerialPort::OneStop;
     QSerialPort::FlowControl  flowcontrol =     QSerialPort::NoFlowControl;
 
+    bool isValid = true;
 
     static SerialParams fromJsonString(const QString& json_string)
     {

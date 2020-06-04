@@ -3,7 +3,7 @@
 
 using namespace sv;
 
-SerialEditor* SERIALEDITOR_UI = nullptr;
+//SerialEditor* SERIALEDITOR_UI = nullptr;
 SerialEditor* SerialEditor::_instance = nullptr;
 
 SerialEditor::SerialEditor(SerialParams params, const QString& label, QWidget *parent) :
