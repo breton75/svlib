@@ -109,7 +109,7 @@ namespace sv
         bool log_truncate_on_rotation = false;
         quint32 log_rotation_age = 3600; // в секундах
         qint64 log_rotation_size = 10485760; // в байтах (10 мб)
-        QString log_sender_name = "device%1";
+        QString log_sender_name = "";
     };
 
     /*
