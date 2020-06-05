@@ -400,6 +400,14 @@ namespace sv
 
     }
 
+    sv::SvAbstractLogger &operator<< (sv::log::sender& sender) {
+
+      p_current_sender = sender;
+
+      return *this;
+
+    }
+
   };
 }
 
