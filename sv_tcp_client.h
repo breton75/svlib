@@ -1,4 +1,4 @@
-#ifndef SV_TCPSERVERCLIENT_H
+﻿#ifndef SV_TCPSERVERCLIENT_H
 #define SV_TCPSERVERCLIENT_H
 
 #include <QObject>
@@ -55,86 +55,25 @@ namespace svtcp {
     int status;
   };
   
-  class SvTcpServer;
   class SvTcpClient;
 
 }
-
-class svtcp::SvTcpServer : public QObject
-{
-    Q_OBJECT
-
-  private:
-    
-public:
-    
-    SvTcpServer(sv::SvAbstractLogger &logger,
-                svtcp::LogMode logRequestMode = svtcp::LogAsIs,
-                svtcp::LogMode logResponseMode = svtcp::LogAsIs,
-                bool showLog = true,
-                QObject *parent = 0);
-    
-    ~SvTcpServer();
-    
-    void setPort(quint16 port) { _port = port; }
-    
-    bool startServer(quint16 port, QObject* parent = 0);
-    bool startServer(QObject* parent = 0) { return startServer(_port, parent); }
-    void stopServer();
-    
-    QString lastError() { return _lastError; }
-    
-    void sendToClient(QTcpSocket* pSocket, const QByteArray &data);
-    void sendToAll(const QByteArray &data);
-    
-private:
-    
-    QTcpServer* _server;
-    quint16 _port = 35580;
-    
-    bool _isRunned = false;
-    
-    quint16     nextBlockSize = 0;
-  
-    svlog::SvLog _log;
-
-    QByteArray _last_message;
-    QHostAddress _lastClientIp;
-    
-    QString _lastError = "";
-    
-    svtcp::LogMode _logRequestMode = svtcp::LogAsIs;
-    svtcp::LogMode _logResponseMode = svtcp::LogAsIs;
-    
-    bool _showLog = true;
-    
-    QMap<quint64, QTcpSocket*> _connections;
-    
-signals:
-    void sigGotMessage();
-    void sigClientDisconnected();
-    
-private slots:
-    void slotSocketError(QAbstractSocket::SocketError err);
-  
-public slots:
-    void slotNewConnection();
-    void slotReadClient   ();
-    void slotClientDisconnected();
-    
-};
 
 class svtcp::SvTcpClient : public QObject
 {
     Q_OBJECT
 
+    sv::SvAbstractLogger *_logger = nullptr;
+
   public:
     SvTcpClient(QString ip = "", quint16 port = 35580,
-                QTextEdit *logWidget = nullptr,
+                sv::SvAbstractLogger *logger = nullptr,
                 int flags = svtcp::LogInData | svtcp::LogOutData,
                 QObject *parent = nullptr);
+
+    ~SvTcpClient();
     
-    void setLog(svlog::SvLog &log) { _log = log; }
+    void setLogger(sv::SvAbstractLogger *logger) { _logger = logger; }
     
     void setIp(QString ip) { _ip = ip; }
     void setPort(quint16 port) { _port = port; }
@@ -153,9 +92,11 @@ class svtcp::SvTcpClient : public QObject
     const svtcp::Response *response() { return &_response; }
     
     QString lastError() { return _lastError; }
+
+    QTcpSocket* socket() const { return _socket; }
     
     /* для отладки таймера */
-    void sendData(int msecWaitForAnswer);
+//    void sendData(int msecWaitForAnswer);
     
 private:
   QObject *_parent = nullptr;
@@ -174,7 +115,7 @@ private:
 //  quint64 _responseSize = 0;
 //  int _responseStatus = -1;
   
-  svlog::SvLog _log;
+
   int _log_flags = svtcp::LogInData | svtcp::LogOutData;
     
   QString _lastError = "";
