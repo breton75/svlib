@@ -1,4 +1,4 @@
-#include "sv_udp_editor.h"
+﻿#include "sv_udp_editor.h"
 #include "ui_sv_udp_editor.h"
 
 using namespace sv;
@@ -32,8 +32,8 @@ UdpEditor::UdpEditor(const QString& params, const QString& label, QWidget *paren
 void UdpEditor::init(const QString& label)
 {
   ui->lineHost->setText(_params.host);
-  ui->spinListenPort->setValue(_params.listen_port);
-  ui->spinRemotePort->setValue(_params.remote_port);
+  ui->spinListenPort->setValue(_params.recv_port);
+  ui->spinRemotePort->setValue(_params.send_port);
   
   ui->lblCaption->setText(label);
     
@@ -58,8 +58,8 @@ void UdpEditor::accept()
   }
 
   _params.host = ui->lineHost->text();
-  _params.listen_port = ui->spinListenPort->value();
-  _params.remote_port = ui->spinRemotePort->value();
+  _params.recv_port = ui->spinListenPort->value();
+  _params.send_port = ui->spinRemotePort->value();
   
   QDialog::accept();
     

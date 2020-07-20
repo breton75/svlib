@@ -21,48 +21,80 @@
 #include "sv_exception.h"
 
 // имена параметров для UDP
-#define P_UDP_HOST        "host"
-#define P_UDP_LISTEN_PORT "listen_port"
-#define P_UDP_REMOTE_PORT "remote_port"
+#define P_UDP_HOST      "host"
+#define P_UDP_RECV_PORT "recv_port"
+#define P_UDP_SEND_PORT "send_port"
 
 namespace sv {
 
   /** структура для хранения параметров последовательного порта **/
   struct UdpParams {
 
-    QString host        = "";
-    quint16 listen_port = 5300;
-    quint16 remote_port = 5300;
+    QString host      = "";
+    quint16 recv_port = 6001;
+    quint16 send_port = 5001;
 
-    static UdpParams fromJsonString(const QString& json_string)
+    static UdpParams fromJsonString(const QString& json_string) throw (SvException)
     {
-      QJsonDocument jd = QJsonDocument::fromJson(json_string.toUtf8());
-      return fromJsonObject(jd.object());
+      QJsonParseError err;
+      QJsonDocument jd = QJsonDocument::fromJson(json_string.toUtf8(), &err);
+
+      SvException excpt;
+
+      if(err.error != QJsonParseError::NoError)
+        throw excpt.assign(err.errorString());
+      try {
+        return fromJsonObject(jd.object());
+      }
+      catch(SvException e) {
+        throw e;
+      }
+
     }
 
-    static UdpParams fromJsonObject(const QJsonObject &object)
+    static UdpParams fromJsonObject(const QJsonObject &object) throw (SvException)
     {
       UdpParams p;
+      SvException excpt;
 
-      if(object.contains(P_UDP_HOST))
+      if(object.contains(P_UDP_HOST)) {
+
+        if(QHostAddress(object.value(P_UDP_HOST).toString("")).toIPv4Address() == 0)
+          throw excpt.assign(QString("Wrong param value: %1 : %2").arg(P_UDP_HOST).arg(object.value(P_UDP_HOST).toVariant().toString()));
+
         p.host = object.value(P_UDP_HOST).toString("");
 
-      if(object.contains(P_UDP_LISTEN_PORT))
-        p.listen_port = object.value(P_UDP_LISTEN_PORT).toInt(5300);
+      }
 
-      if(object.contains(P_UDP_REMOTE_PORT))
-        p.remote_port = object.value(P_UDP_REMOTE_PORT).toInt(5300);
+      if(object.contains(P_UDP_RECV_PORT)) {
+
+        p.recv_port = object.value(P_UDP_RECV_PORT).toInt(0);
+
+        if(p.recv_port == 0)
+          throw excpt.assign(QString("Wrong param value: %1 : %2").arg(P_UDP_RECV_PORT).arg(object.value(P_UDP_RECV_PORT).toVariant().toString()));
+
+      }
+
+      if(object.contains(P_UDP_SEND_PORT))
+      {
+
+        p.send_port = object.value(P_UDP_SEND_PORT).toInt(0);
+
+        if(p.send_port == 0)
+          throw excpt.assign(QString("Wrong param value: %1 : %2").arg(P_UDP_SEND_PORT).arg(object.value(P_UDP_SEND_PORT).toVariant().toString()));
+
+      }
 
       return p;
 
     }
 
-    QString toJsonString() const
+    QString toJsonString(QJsonDocument::JsonFormat format = QJsonDocument::Indented) const
     {
       QJsonDocument jd;
       jd.setObject(toJsonObject());
 
-      return QString(jd.toJson(QJsonDocument::Indented));
+      return QString(jd.toJson(format));
     }
 
     QJsonObject toJsonObject() const
@@ -70,8 +102,8 @@ namespace sv {
       QJsonObject j;
 
       j.insert(P_UDP_HOST, QJsonValue(host).toString());
-      j.insert(P_UDP_LISTEN_PORT, QJsonValue(static_cast<int>(listen_port)).toInt());
-      j.insert(P_UDP_REMOTE_PORT, QJsonValue(static_cast<int>(remote_port)).toInt());
+      j.insert(P_UDP_RECV_PORT, QJsonValue(static_cast<int>(recv_port)).toInt());
+      j.insert(P_UDP_SEND_PORT, QJsonValue(static_cast<int>(send_port)).toInt());
 
       return j;
 

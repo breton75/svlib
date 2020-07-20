@@ -1,4 +1,4 @@
-#ifndef SVSETTINGS_H
+﻿#ifndef SVSETTINGS_H
 #define SVSETTINGS_H
 
 #include <QtWidgets/QApplication>
@@ -13,6 +13,7 @@
 #include <QDebug>
 #include <QtWidgets/QMainWindow>
 #include <QFileInfo>
+#include <QSplitter>
 
 #include "sv_exception.h"
 
@@ -27,6 +28,9 @@ namespace AppParams
     Qt::WindowState state;
   };
 
+  static QSettings::Format current_format = QSettings::IniFormat;
+
+  void setCurrentFormat(QSettings::Format format);
   
   QFileInfo getFileInfoFromApp(const QString& extention);
   

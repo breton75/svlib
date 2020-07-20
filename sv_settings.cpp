@@ -1,4 +1,4 @@
-#include "sv_settings.h"
+﻿#include "sv_settings.h"
 
 //QSettings::Format current_format = QSettings::NativeFormat;
 
@@ -10,24 +10,49 @@ QString AppParams::saveLayout(QMainWindow *mainWindow)
   
   try {
     
+//    QFileInfo fi = QFileInfo(getFileInfoFromApp("layout"));
+//    file.setFileName(fi.absoluteFilePath());
+    
+//    if (!file.open(QFile::WriteOnly))
+//      except.raise(QString("Ошибка при открытии файла %1: %2").arg(fi.fileName()).arg(file.errorString()));
+    
+//    QByteArray geometry_data = mainWindow->saveGeometry();
+//    QByteArray layout_data = mainWindow->saveState();
+    
+//    if(!file.putChar((uchar)geometry_data.size()))
+//      except.raise(QString("Ошибка записи в файл %1: %2").arg(fi.fileName()).arg(file.errorString()));
+      
+//    if(file.write(geometry_data) != geometry_data.size())
+//      except.raise(QString("Ошибка записи в файл %1: %2").arg(fi.fileName()).arg(file.errorString()));
+    
+//    if(file.write(layout_data) != layout_data.size())
+//      except.raise(QString("Ошибка записи в файл %1: %2").arg(fi.fileName()).arg(file.errorString()));
+    
     QFileInfo fi = QFileInfo(getFileInfoFromApp("layout"));
     file.setFileName(fi.absoluteFilePath());
-    
-    if (!file.open(QFile::WriteOnly)) 
+
+    if (!file.open(QFile::WriteOnly))
       except.raise(QString("Ошибка при открытии файла %1: %2").arg(fi.fileName()).arg(file.errorString()));
-    
+
     QByteArray geometry_data = mainWindow->saveGeometry();
     QByteArray layout_data = mainWindow->saveState();
-    
-    if(!file.putChar((uchar)geometry_data.size()))
+
+    if(!(file.putChar((uchar)geometry_data.size()) && file.write(geometry_data) == geometry_data.size()))
       except.raise(QString("Ошибка записи в файл %1: %2").arg(fi.fileName()).arg(file.errorString()));
-      
-    if(file.write(geometry_data) != geometry_data.size())
+
+    if(!(file.putChar((uchar)layout_data.size()) && file.write(layout_data) == layout_data.size()))
       except.raise(QString("Ошибка записи в файл %1: %2").arg(fi.fileName()).arg(file.errorString()));
-    
-    if(file.write(layout_data) != layout_data.size())
-      except.raise(QString("Ошибка записи в файл %1: %2").arg(fi.fileName()).arg(file.errorString()));
-    
+
+
+    for(QSplitter* sp: mainWindow->findChildren<QSplitter*>()) {
+
+        QByteArray splitter_data = sp->saveState();
+
+        if(!(file.putChar((uchar)splitter_data.size()) && file.write(splitter_data) == splitter_data.size()))
+          except.raise(QString("Ошибка записи в файл %1: %2").arg(fi.fileName()).arg(file.errorString()));
+
+    }
+
     file.close();
     
   }
@@ -90,39 +115,93 @@ QString AppParams::loadLayout(QMainWindow *mainWindow)
   
   try {
     
-    QFileInfo fi = QFileInfo(getFileInfoFromApp("layout"));
-    file.setFileName(fi.absoluteFilePath());
+//    QFileInfo fi = QFileInfo(getFileInfoFromApp("layout"));
+//    file.setFileName(fi.absoluteFilePath());
     
-    if(!fi.exists())
-      except.raise(QString("Файл %1 не найден. Будет создан новый.").arg(fi.fileName()));
+//    if(!fi.exists())
+//      except.raise(QString("Файл %1 не найден. Будет создан новый.").arg(fi.fileName()));
     
-    if (!file.open(QFile::ReadOnly)) 
-      except.raise(QString("Ошибка при открытии файла %1: %2").arg(fi.fileName()).arg(file.errorString()));
+//    if (!file.open(QFile::ReadOnly))
+//      except.raise(QString("Ошибка при открытии файла %1: %2").arg(fi.fileName()).arg(file.errorString()));
     
-    uchar geometry_size;
-    QByteArray geometry_data;
-    QByteArray layout_data;
+//    uchar geometry_size;
+//    QByteArray geometry_data;
+//    QByteArray layout_data;
  
-    if(!file.getChar((char*)&geometry_size))
-      except.raise(QString("Ошибка чтения из файла %1: %2").arg(fi.fileName()).arg(file.errorString()));
+//    if(!file.getChar((char*)&geometry_size))
+//      except.raise(QString("Ошибка чтения из файла %1: %2").arg(fi.fileName()).arg(file.errorString()));
       
-    geometry_data = file.read(geometry_size);
+//    geometry_data = file.read(geometry_size);
     
-    if(geometry_data.size() != geometry_size)
-      except.raise(QString("Неверный размер данных в файле %1. Ожидалось %2, прочитано %3")
-                   .arg(fi.fileName())
-                   .arg(geometry_size)
-                   .arg(geometry_data.size()));
+//    if(geometry_data.size() != geometry_size)
+//      except.raise(QString("Неверный размер данных в файле %1. Ожидалось %2, прочитано %3")
+//                   .arg(fi.fileName())
+//                   .arg(geometry_size)
+//                   .arg(geometry_data.size()));
 
     
-    layout_data = file.readAll();
-    if(layout_data.size() <= 0)
-      except.raise(QString("Неверный размер данных в файле %1 (layout_data = 0)")
-                   .arg(fi.fileName()));
+//    layout_data = file.readAll();
+//    if(layout_data.size() <= 0)
+//      except.raise(QString("Неверный размер данных в файле %1 (layout_data = 0)")
+//                   .arg(fi.fileName()));
     
+//    mainWindow->restoreGeometry(geometry_data);
+//    mainWindow->restoreState(layout_data);
+
+    QFileInfo fi = QFileInfo(getFileInfoFromApp("layout"));
+    file.setFileName(fi.absoluteFilePath());
+
+    if(!fi.exists())
+      except.raise(QString("Файл %1 не найден. Будет создан новый.").arg(fi.fileName()));
+
+    if (!file.open(QFile::ReadOnly))
+      except.raise(QString("Ошибка при открытии файла %1: %2").arg(fi.fileName()).arg(file.errorString()));
+
+    uchar geometry_size, layout_size;
+    QByteArray geometry_data;
+    QByteArray layout_data;
+
+    if(!file.getChar((char*)&geometry_size))
+      except.raise(QString("Ошибка чтения из файла %1: %2").arg(fi.fileName()).arg(file.errorString()));
+
+    geometry_data = file.read(geometry_size);
+
+    if(geometry_data.size() != geometry_size)
+      except.raise(QString("Неверный размер данных в файле %1. Ожидалось %2, прочитано %3")
+                   .arg(fi.fileName()).arg(geometry_size).arg(geometry_data.size()));
+
+    if(!file.getChar((char*)&layout_size))
+      except.raise(QString("Ошибка чтения из файла %1: %2").arg(fi.fileName()).arg(file.errorString()));
+
+    layout_data = file.read(layout_size);
+
+    if(layout_data.size() != layout_size)
+      except.raise(QString("Неверный размер данных в файле %1. Ожидалось %2, прочитано %3")
+                   .arg(fi.fileName()).arg(geometry_size).arg(geometry_data.size()));
+
+
     mainWindow->restoreGeometry(geometry_data);
     mainWindow->restoreState(layout_data);
-    
+
+    QList<QSplitter*> spl = mainWindow->findChildren<QSplitter*>();
+    for(QSplitter* sp: spl) {
+
+        uchar splitter_size;
+        QByteArray splitter_data;
+
+        if(!file.getChar((char*)&splitter_size))
+          except.raise(QString("Ошибка чтения из файла %1: %2").arg(fi.fileName()).arg(file.errorString()));
+
+        splitter_data = file.read(splitter_size);
+
+        if(splitter_data.size() != splitter_size)
+          except.raise(QString("Неверный размер данных в файле %1. Ожидалось %2, прочитано %3")
+                       .arg(fi.fileName()).arg(splitter_size).arg(splitter_data.size()));
+
+        sp->restoreState(splitter_data);
+
+    }
+
     file.close();
     
   }
@@ -239,14 +318,34 @@ void AppParams::saveParam(QObject* parent, QString group_name, QString param_nam
 
 }
 
+void AppParams::setCurrentFormat(QSettings::Format format)
+{
+  AppParams::current_format = format;
+}
+
 QString AppParams::checkFileName(QString fname)
 {
   QString result = fname;
-  
-  if(result.isEmpty())
-    result = qApp->applicationDirPath() + '/' + qApp->applicationName() + ".ini";
-//    result = QDir::toNativeSeparators(qApp->applicationDirPath()) + QDir::separator() + qApp->applicationName() + ".ini";
-  
+
+  if(result.isEmpty()) {
+
+    QString app_path = qApp->applicationDirPath();
+
+    if(!app_path.endsWith(QDir::separator()))
+      app_path.push_back(QDir::separator());
+
+    switch (current_format) {
+
+    case QSettings::NativeFormat:
+      result = app_path + qApp->applicationName() + ".cfg";
+      break;
+
+    default:
+      result = app_path + qApp->applicationName() + ".ini";
+      break;
+    }
+  }
+
   return result;
 }
 

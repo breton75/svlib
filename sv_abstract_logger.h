@@ -109,7 +109,7 @@ namespace sv
         bool log_truncate_on_rotation = false;
         quint32 log_rotation_age = 3600; // в секундах
         qint64 log_rotation_size = 10485760; // в байтах (10 мб)
-        QString log_sender_name = "";
+        QString log_sender_name_format = "";
     };
 
     /*
@@ -159,8 +159,16 @@ namespace sv
     class sender
     {
       public:
-        explicit sender(const QString senderName): name(senderName) { }
-        QString name;
+        explicit sender(const QString& senderName = ""): name(senderName){ }
+        QString name = "";
+
+        static sv::log::sender make(const QString& name_template, const QString& name, int index)
+        {
+          QString sn = name_template;
+          sn.replace("%n", name).replace("%i", QString::number(index));
+          return sv::log::sender(sn);
+        }
+
     };
 
   }
