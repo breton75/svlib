@@ -9,7 +9,7 @@
 #include <QDataStream>
 #include <QHostAddress>
 
-#include "sv_clog.h"
+#include "sv_abstract_logger.h"
 
 namespace svtcp {
 
