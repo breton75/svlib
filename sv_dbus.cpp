@@ -1,6 +1,6 @@
 ﻿#include "sv_dbus.h"
 
-QMutex mutex;
+QMutex sv::SvDBus::mutex;
 
 sv::SvDBus::SvDBus(const sv::log::Options options, const sv::log::Flags flags, QObject *parent):
   sv::SvAbstractLogger(options, flags, parent)
@@ -20,7 +20,7 @@ void sv::SvDBus::init()
 void sv::SvDBus::log(sv::log::Level level, sv::log::MessageTypes type, const QString &text, bool newline)
 {
   // при создании лочится, при завершении функции - locker удаляется, и разлочивается
-  QMutexLocker locker(&mutex);
+  QMutexLocker locker(&sv::SvDBus::mutex);
 
   if(p_options.logging && (level <= p_options.log_level))
   {

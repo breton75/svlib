@@ -91,6 +91,8 @@ namespace sv {
 
     void sendmsg(const QString &sender, const QString& message, const QString &type);
 
+    static QMutex mutex;
+
   };
 }
 
