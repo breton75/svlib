@@ -87,11 +87,11 @@ namespace sv {
 
     void init();
 
-    void log(sv::log::Level level, log::MessageTypes type, const QString& text, bool newline = true);
+    void log(sv::log::Level level, log::MessageTypes type, const QString text, sv::log::sender sender, bool newline = true);
 
     void sendmsg(const QString &sender, const QString& message, const QString &type);
 
-    static QMutex mutex;
+    QMutex mutex;
 
   };
 }

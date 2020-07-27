@@ -1,6 +1,6 @@
 ﻿#include "sv_dbus.h"
 
-QMutex sv::SvDBus::mutex;
+//QMutex sv::SvDBus::mutex;
 
 sv::SvDBus::SvDBus(const sv::log::Options options, const sv::log::Flags flags, QObject *parent):
   sv::SvAbstractLogger(options, flags, parent)
@@ -17,16 +17,17 @@ void sv::SvDBus::init()
 
 }
 
-void sv::SvDBus::log(sv::log::Level level, sv::log::MessageTypes type, const QString &text, bool newline)
+void sv::SvDBus::log(sv::log::Level level, sv::log::MessageTypes type, const QString text, sv::log::sender sender, bool newline)
 {
   // при создании лочится, при завершении функции - locker удаляется, и разлочивается
-  QMutexLocker locker(&sv::SvDBus::mutex);
+  mutex.lock();
+//  QMutexLocker locker(&mutex);
 
   if(p_options.logging && (level <= p_options.log_level))
   {
 
     QString msg = QString("%1").arg(text); //.arg(newline ? "\n" : "");
-    sendmsg(p_current_sender.name, msg, sv::log::typeToString(type));
+    sendmsg(sender.name, msg, sv::log::typeToString(type));
 
     if(newline)
       p_current_line_num++;
@@ -35,6 +36,7 @@ void sv::SvDBus::log(sv::log::Level level, sv::log::MessageTypes type, const QSt
 
   resetCurrentData();
 
+  mutex.unlock();
 }
 
 void sv::SvDBus::sendmsg(const QString &sender, const QString& message, const QString &type)

@@ -56,6 +56,8 @@ namespace sv
       in
     };
 
+    typedef QList<MessageBuns> BunList;
+
     enum Devices {
       ldUndefined = -1,
       ldConsole,
@@ -239,14 +241,17 @@ namespace sv
       return *this;
     }
 
-    virtual void log(sv::log::Level level, sv::log::MessageTypes type, const QString& text, bool newline = true) = 0;
+    virtual void log(sv::log::Level level,
+                     sv::log::MessageTypes type, const QString text,
+                     sv::log::sender sender, bool newline = true) = 0;
 
-    virtual void log(bool newline = true) { log(p_current_log_lvl, p_current_msg_type, p_current_line, newline); }
+    virtual void log(bool newline = true) { log(p_current_log_lvl, p_current_msg_type,
+                                                p_current_line, p_current_sender, newline); }
 
-    virtual void log(sv::log::Level level, sv::log::MessageTypes type, const QStringList& list)
+    virtual void log(sv::log::Level level, sv::log::MessageTypes type, const QStringList& list, sv::log::sender sender)
     {
       for(QString str: list)
-        log(level, type, str);
+        log(level, type, str, sender);
 
     }
 
@@ -344,7 +349,7 @@ namespace sv
 
     }
 
-    sv::SvAbstractLogger &operator<< (const QString &string)
+    sv::SvAbstractLogger &operator<< (const QString string)
     {
       p_current_line += string + p_separator;
 
