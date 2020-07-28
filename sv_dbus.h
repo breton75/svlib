@@ -77,6 +77,7 @@ namespace sv {
     OrgExampleChatInterface* _iface = nullptr;
 
 //    static SvDBus* _instance;
+
   public:
 
     explicit SvDBus(const sv::log::Options options = sv::log::Options(),
@@ -89,9 +90,9 @@ namespace sv {
 
     void log(sv::log::Level level, log::MessageTypes type, const QString text, sv::log::sender sender, bool newline = true);
 
-    void sendmsg(const QString &sender, const QString& message, const QString &type);
+    static void sendmsg(const QString &sender, const QString& message, const QString &type);
 
-    QMutex mutex;
+    static QMutex mutex;
 
   };
 }
