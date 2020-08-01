@@ -64,7 +64,7 @@ public:
 
   ~SvWidgetLogger();
 
-  void log(sv::log::Level level, log::MessageTypes type, const QString& text, bool newline = true);
+  void log(sv::log::Level level, log::MessageTypes type, const QString text, sv::log::sender sender, bool newline = true);
 
   void setTextEdit(QTextEdit *textEdit) { _log_edit = textEdit; }
   QTextEdit *logEdit() const { return _log_edit; }

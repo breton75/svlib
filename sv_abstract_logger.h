@@ -252,7 +252,6 @@ namespace sv
     {
       for(QString str: list)
         log(level, type, str, sender);
-
     }
 
     const QString currentLine() const                       { return p_current_line;        }
