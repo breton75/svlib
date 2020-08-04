@@ -13,6 +13,15 @@ public:
     SomeError = 1
   };
 
+  SvException() { }
+  SvException(const QString& error)
+  {
+    this->error = error;
+    this->type = error.isEmpty() ? NoError : SomeError;
+  }
+
+  virtual ~SvException() throw() { }
+
   void raise(QString error) { this->error = error; throw *this; }
   void raise(int code, QString error = "") { this->code = code; this->error = error; throw *this; }
   void raise() { throw *this; }
@@ -22,7 +31,6 @@ public:
 
   SvException *clone() const { return new SvException(*this); }
 
-  virtual ~SvException() throw() { }
 
   QString error;
   int code;
