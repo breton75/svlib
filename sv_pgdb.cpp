@@ -1,4 +1,4 @@
-#include "sv_pgdb.h"
+﻿#include "sv_pgdb.h"
 
 SvPGDB *PGDB = nullptr;
 
@@ -98,8 +98,7 @@ QSqlError SvPGDB::execSQL(QString queryText)
 
   if(queryText == "") {  
     
-    _last_error.setType(QSqlError::UnknownError);
-    _last_error.setDatabaseText("Query is empty");
+    _last_error = QSqlError("Query is empty", "Query is empty", QSqlError::UnknownError);
     
     return _last_error;
     
@@ -118,8 +117,7 @@ QSqlError SvPGDB::execSQL(QString queryText, QByteArray *data1, QByteArray *data
 
   if((queryText.isEmpty()) || (data1 == 0)) {  
     
-    _last_error.setType(QSqlError::UnknownError);
-    _last_error.setDatabaseText("Query is empty");
+    _last_error = QSqlError("Query is empty", "Query is empty", QSqlError::UnknownError);
     
     return _last_error;
     
@@ -152,8 +150,7 @@ QSqlError SvPGDB::execSQL(QString queryText, QSqlQuery* query)
 {
   if(queryText == "") {  
     
-    _last_error.setType(QSqlError::UnknownError);
-    _last_error.setDatabaseText("Query is empty");
+    _last_error = QSqlError("Query is empty", "Query is empty", QSqlError::UnknownError);
     
     return _last_error;
     
@@ -169,8 +166,7 @@ QSqlError SvPGDB::execSQL(QString queryText, QSqlQueryModel *model)
 {
   if(queryText == "") {  
     
-    _last_error.setType(QSqlError::UnknownError);
-    _last_error.setDatabaseText("Query is empty");
+    _last_error = QSqlError("Query is empty", "Query is empty", QSqlError::UnknownError);
     
     return _last_error;
     
@@ -192,8 +188,6 @@ QSqlError SvPGDB::disconnectFromDb()
 
 bool SvPGDB::checkTableExists(QString tableName)
 {
-  _last_error.setType(QSqlError::NoError);
-  
   QSqlQuery* q = new QSqlQuery(db);
   
   _last_error = execSQL(QString(CHECK_TABLE_EXISTS).arg(tableName), q);
