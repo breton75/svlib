@@ -1,4 +1,4 @@
-/* ******************************************************************** *
+﻿/* ******************************************************************** *
  *
  *  Классы для работы с параметрами запуска приложения                  *
  *  SvCommandLineParser - разбор параметров командной строки            *
@@ -53,7 +53,14 @@ class SvCommandLineParser : public QCommandLineParser
 {
 
 public:
+    SvCommandLineParser()
+    {
+
+    }
+
     SvCommandLineParser(const OptionStructList& options);
+
+    void addOptionStructList(const OptionStructList& options);
 
     bool isSetHelpOption() const { return isSet("help"); }
     bool isSetVersionOption() const { return isSet("version"); }

@@ -13,11 +13,25 @@ public:
     SomeError = 1
   };
 
-  SvException() { }
-  SvException(const QString& error)
+  SvException()
+  {
+    this->error = "";
+    this->type = NoError;
+    this->code = 0;
+  }
+
+  SvException(const QString& error, int code = 0)
   {
     this->error = error;
     this->type = error.isEmpty() ? NoError : SomeError;
+    this->code = code;
+  }
+
+  SvException(ErrorType type, const QString& error, int code = 0)
+  {
+    this->error = error;
+    this->type = type;
+    this->code = code;
   }
 
   virtual ~SvException() throw() { }
@@ -38,6 +52,34 @@ public:
 
 };
 
+class SvResult
+{
+public:
+
+  enum ResultType {
+    OK = 0,
+    Error = 1
+  };
+
+  SvResult(ResultType type = OK, const QString& text = "", int code = 0)
+  {
+    this->text = text;
+    this->type = type;
+    this->code = code;
+  }
+
+  SvResult& assign(const QString& text) { this->code = code; this->text = text; return *this; }
+  SvResult& assign(int code) { this->code = code; return *this; }
+  SvResult& assign(ResultType type) { this->type = type; return *this; }
+
+  SvResult *clone() const { return new SvResult(*this); }
+
+
+  QString text;
+  int code;
+  ResultType type;
+
+};
 
 
 #endif // SV_EXCEPTION_H

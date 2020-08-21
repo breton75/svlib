@@ -1,19 +1,21 @@
-#include "sv_config.h"
+﻿#include "sv_config.h"
 
 /* SvCommandLineParser */
 SvCommandLineParser::SvCommandLineParser(const OptionStructList &options):
     QCommandLineParser()
 {
-
-    for (int i = 0; i < options.count(); ++i) {
-
-        OptionStruct o = options.at(i);
-        addOption(QCommandLineOption(o.default_names, o.description, o.default_value, o.default_value));
-
-    }
+  addOptionStructList(options);
 }
 
+void SvCommandLineParser::addOptionStructList(const OptionStructList& options)
+{
+  for (int i = 0; i < options.count(); ++i) {
 
+      OptionStruct o = options.at(i);
+      addOption(QCommandLineOption(o.default_names, o.description, o.default_value, o.default_value));
+
+  }
+}
 
 /* SvConfigFileParser */
 
