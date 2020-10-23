@@ -20,6 +20,13 @@ public:
     this->code = 0;
   }
 
+  SvException(int code)
+  {
+    this->error = "";
+    this->type = code == 0 ? NoError : SomeError;
+    this->code = code;
+  }
+
   SvException(const QString& error, int code = 0)
   {
     this->error = error;
