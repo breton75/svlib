@@ -1,4 +1,4 @@
-/* класс только для работы с базами данных PostgreSQL */
+﻿/* класс только для работы с базами данных PostgreSQL */
 
 #ifndef SV_PGDB_H
 #define SV_PGDB_H
@@ -14,7 +14,7 @@
 #include <QDebug>
 #include <QMutex>
 
-#include "sv_exception.h"
+#include "../../SvException/1.0/sv_exception.h"
 
 
 #define CHECK_TABLE_EXISTS \

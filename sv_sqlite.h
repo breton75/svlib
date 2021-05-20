@@ -1,4 +1,4 @@
-/* класс только для работы с базами данных SQLite */
+﻿/* класс только для работы с базами данных SQLite */
 
 #ifndef SV_SQLITE_H
 #define SV_SQLITE_H
@@ -14,7 +14,7 @@
 #include <QDebug>
 #include <QMutex>
 
-#include "sv_exception.h"
+#include "SvException/1.0/sv_exception.h"
 
 class SvSQLITE : public QObject // QThread //
 {

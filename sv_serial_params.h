@@ -18,7 +18,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#include "sv_exception.h"
+#include "SvException/1.0/sv_exception.h"
 
 // имена параметров для RS
 #define P_SERIAL_BAUDRATE "baudrate"
