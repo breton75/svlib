@@ -59,10 +59,10 @@ void sv::SvWidgetLogger::bindTo(QTextEdit *widget)
 
 void sv::SvWidgetLogger::log(sv::log::Level level, sv::log::MessageTypes type, const QString text, log::sender sender, bool newline)
 {
-  if(p_options.logging)
+  if(p_options.enable)
   {
 
-    if(p_check_log_level && level > p_options.log_level)
+    if(p_check_log_level && level > p_options.level)
       return;
 
     if(!_log_edit) {

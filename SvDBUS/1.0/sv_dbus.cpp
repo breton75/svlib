@@ -12,9 +12,9 @@ void sv::SvDBus::init(const QString& branch)
 {
   m_branch = branch;
 
-  QDBusConnection::sessionBus().registerObject(m_branch, this);
+  QDBusConnection::sessionBus().registerObject(m_branch, DBUS_SERVER_NAME, this);
 
-  new org::niirpi::modus(DBUS_SERVER_NAME, m_branch, QDBusConnection::sessionBus(), this);
+  new proj::modus::modus(DBUS_SERVER_NAME, m_branch, QDBusConnection::sessionBus(), this);
 
 //  ModusDBusAdaptor *mdba = new ModusDBusAdaptor(this);
 
@@ -25,11 +25,11 @@ void sv::SvDBus::log(sv::log::Level level, sv::log::MessageTypes type, const QSt
 
 //  mutex.lock();
 
-  if(p_options.logging && (level <= p_options.log_level))
+  if(p_options.enable && (level <= p_options.level))
   {
 
     QString msg = QString("%1").arg(text); //.arg(newline ? "\n" : "");
-    sendmsg(sender.name, msg, sv::log::typeToString(type), m_branch);
+    sendmsg(sender, msg, sv::log::typeToString(type));
 
     if(newline)
       p_current_line_num++;
@@ -44,13 +44,15 @@ void sv::SvDBus::log(sv::log::Level level, sv::log::MessageTypes type, const QSt
 //  mutex.unlock();
 }
 
-void sv::SvDBus::sendmsg(const QString &sender, const QString& message, const QString &type, const QString &branch)
+void sv::SvDBus::sendmsg(const log::sender &sender, const QString& message, const QString &type)
 {
   // при создании лочится, при завершении функции - locker удаляется, и разлочивается
   QMutexLocker locker(&mutex);
 
-  QDBusMessage msg = QDBusMessage::createSignal(branch, DBUS_SERVER_NAME, "message");
-  msg << sender << message << type;
+  QDBusMessage msg = QDBusMessage::createSignal(QString("/%1").arg(sender.entity()), DBUS_SERVER_NAME, "message");
+
+  msg << QString::number(sender.id()) << message << type;
+
   QDBusConnection::sessionBus().send(msg);
 }
 

@@ -41,13 +41,13 @@ class sv::SvWidgetLogger: public sv::SvAbstractLogger
 
   QMap<sv::log::MessageTypes, QColor> typesColors = {{sv::log::mtSimple,    Qt::black         },
                                                      {sv::log::mtData,      QColor(223344)    },
-                                                     {sv::log::mtError,     Qt::red           },
+//                                                     {sv::log::mtError,     Qt::red           },
                                                      {sv::log::mtInfo,      QColor(0x009A8832)},
                                                      {sv::log::mtDuty,      QColor(0x003A6098)},
                                                      {sv::log::mtAttention, Qt::darkMagenta   },
-                                                     {sv::log::mtNewData,   QColor(0x00BD6311)},
                                                      {sv::log::mtFail,      QColor(0x00173EF4)},
                                                      {sv::log::mtDebug,     QColor(0x008A8A8A)},
+                                                     {sv::log::mtNew,       QColor(0x00BD6311)},
                                                      {sv::log::mtSuccess,   QColor(0x0020A230)},
                                                      {sv::log::mtCritical,  Qt::red           }};
 

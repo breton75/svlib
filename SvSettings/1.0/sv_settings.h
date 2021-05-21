@@ -15,7 +15,7 @@
 #include <QFileInfo>
 #include <QSplitter>
 
-#include "sv_exception.h"
+#include "../../SvException/1.1/sv_exception.h"
 
 class SvSettings;
 

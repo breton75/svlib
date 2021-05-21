@@ -5,7 +5,7 @@
 #include <QtDBus>
 #include <QDebug>
 
-#include "../../SvAbstractLogger/1.1/sv_abstract_logger.h"
+#include "../../SvAbstractLogger/1.2/sv_abstract_logger.h"
 
 #define DBUS_SERVER_NAME "proj.modus"
 
@@ -35,8 +35,8 @@ Q_SIGNALS: // SIGNALS
     void message(const QString &sender, const QString &text, const QString &type);
 };
 
-namespace org {
-  namespace niirpi {
+namespace proj {
+  namespace modus {
     typedef ::DBusModusInterface modus;
   }
 }
@@ -109,7 +109,7 @@ namespace sv {
         log(level, type, str, sender);
     }
 
-    static void sendmsg(const QString &sender, const QString& message, const QString &type, const QString &branch = "/");
+    static void sendmsg(const sv::log::sender &sender, const QString& message, const QString &type);
 
     static QMutex mutex;
 

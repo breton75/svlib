@@ -150,17 +150,17 @@ namespace sv
 
     struct Options {
 
-        bool            enable                    = true;
-        sv::log::Level  log_level                 = llAll;
-        LogDeviceList   log_devices               = LogDeviceList({ldConsole});
-        QString         log_directory             = "log";
-        QString         log_filename              = "ddMMyyyy_hhmmss";
-        QString         date_format               = "dd.MM.yyyy";
-        QString         time_format               = "hh:mm:ss";
-        bool            log_truncate_on_rotation  = false;
-        quint32         log_rotation_age          = 3600; // в секундах
-        qint64          log_rotation_size         = 10485760; // в байтах (10 мб)
-        QString         log_sender_name_format    = "";
+        bool            enable                = true;
+        sv::log::Level  level                 = llAll;
+        LogDeviceList   devices               = LogDeviceList({ldConsole});
+        QString         directory             = "log";
+        QString         filename              = "ddMMyyyy_hhmmss";
+        QString         date_format           = "dd.MM.yyyy";
+        QString         time_format           = "hh:mm:ss";
+        bool            truncate_on_rotation  = false;
+        quint32         rotation_age          = 3600; // в секундах
+        qint64          rotation_size         = 10485760; // в байтах (10 мб)
+        QString         sender_name_format    = "";
     };
 
     /*
@@ -210,15 +210,18 @@ namespace sv
     class sender
     {
       public:
-        explicit sender(const QString& senderName = ""): name(senderName){ }
-        QString name = "";
+//        explicit sender(const QString& senderName = ""): name(senderName){ }
+        explicit sender(const QString& entity, int id = 0):
+          m_entity(entity),
+          m_id(id)
+        { }
 
-        static sv::log::sender make(const QString& name_template, const QString& name, int index)
-        {
-          QString sn = name_template;
-          sn.replace("%n", name).replace("%i", QString::number(index));
-          return sv::log::sender(sn);
-        }
+        QString entity() const { return m_entity; }
+        int     id()     const { return m_id;   }
+
+        private:
+          QString m_entity;
+          int     m_id;
 
     };
 
@@ -309,7 +312,7 @@ namespace sv
     virtual void setOptions(const sv::log::Options options) { p_options = options;          }
     virtual void setFlags(const sv::log::Flags flags)       { p_check_log_level = flags;    }
     virtual void setSender(const sv::log::sender& sender)   { p_current_sender = sender;    }
-    virtual void setEnable(bool enable)                     { p_options.logging = enable;   }
+    virtual void setEnable(bool enable)                     { p_options.enable = enable;   }
 
     virtual const sv::log::Options options() const          { return p_options;             }
 
