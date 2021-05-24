@@ -6,6 +6,18 @@
 #include <QDebug>
 #include <QDate>
 #include <QTime>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonParseError>
+
+#include "../../SvException/svexception.h"
+
+#define LOG_DEFAULT_PATH          "log"
+#define LOG_DEFAULT_FILENAME      "ddMMyyyy_hhmmss"
+#define LOG_DEFAULT_DATE_FORMAT   "dd.MM.yyyy"
+#define LOG_DEFAULT_TIME_FORMAT   "hh:mm:ss"
+#define LOG_DEFAULT_ROTATION_AGE  3600
+#define LOG_DEFAULT_ROTATION_SIZE 10485760
 
 namespace sv
 {
@@ -54,20 +66,22 @@ namespace sv
       mtLost       = 0x00020000,
       mtLogin      = 0x00040000,
       mtRequest    = 0x00080000,
-      mtConnection = 0x000F0000
+      mtConnection = 0x000F0000,
+
+      mtAny        = 0xFFFFFFFF
 
 
     };
 
     enum Level {
-        llUndefined = -1,
-        llNone = 0,
-        llError,
-        llWarning,
-        llInfo,
-        llDebug,
-        llDebug2,
-        llAll
+      llNone = 0,
+      llError,
+      llWarning,
+      llInfo,
+      llDebug,
+      llDebug2,
+      llAll,
+      llUndefined = 0xFFFF,
     };
 
     const MessageTypes DEFAULT_MESSAGE_TYPE = sv::log::mtSimple;
@@ -148,20 +162,6 @@ namespace sv
 
     typedef QList<Devices> LogDeviceList;
 
-    struct Options {
-
-        bool            enable                = true;
-        sv::log::Level  level                 = llAll;
-        LogDeviceList   devices               = LogDeviceList({ldConsole});
-        QString         directory             = "log";
-        QString         filename              = "ddMMyyyy_hhmmss";
-        QString         date_format           = "dd.MM.yyyy";
-        QString         time_format           = "hh:mm:ss";
-        bool            truncate_on_rotation  = false;
-        quint32         rotation_age          = 3600; // в секундах
-        qint64          rotation_size         = 10485760; // в байтах (10 мб)
-        QString         sender_name_format    = "";
-    };
 
     /*
      * следующие функции предназначены для разбора конфигурации логирования
@@ -206,6 +206,111 @@ namespace sv
 
     /* преобразует текстовое представление в тип сообщения */
     sv::log::MessageTypes stringToType(const QString& str);
+
+
+    struct Options {
+
+        bool            enable                = false;
+        sv::log::Level  level                 = llWarning;
+        LogDeviceList   devices               = LogDeviceList({ldConsole});
+        QString         path                  = LOG_DEFAULT_PATH;
+        QString         filename              = LOG_DEFAULT_FILENAME;
+        QString         date_format           = LOG_DEFAULT_DATE_FORMAT;
+        QString         time_format           = LOG_DEFAULT_TIME_FORMAT;
+        bool            truncate_on_rotation  = false;
+        quint32         rotation_age          = LOG_DEFAULT_ROTATION_AGE; // в секундах
+        qint64          rotation_size         = LOG_DEFAULT_ROTATION_SIZE; // в байтах (10 мб)
+
+
+        static Options fromJsonString(const QString& json_string)
+        {
+          QJsonParseError err;
+          QJsonDocument jd = QJsonDocument::fromJson(json_string.toUtf8(), &err);
+
+          if(err.error != QJsonParseError::NoError)
+            throw SvException(err.errorString());
+
+          try {
+
+            return fromJsonObject(jd.object());
+
+          }
+          catch(SvException& e) {
+            throw e;
+          }
+        }
+
+        static Options fromJsonObject(const QJsonObject &object)
+        {
+          QString P;
+          Options p;
+
+          /* enable */
+          P = "enable";
+          p.enable = object.contains(P) ? object.value(P).toBool(false) : false;
+
+          /* level */
+          P = "level";
+          p.level = object.contains(P) ? stringToLevel(object.value(P).toString("")) : llWarning;
+
+          /* path */
+          P = "path";
+          p.path = object.contains(P) ? object.value(P).toString(LOG_DEFAULT_PATH) : LOG_DEFAULT_PATH;
+
+          /* filename */
+          P = "path";
+          p.filename = object.contains(P) ? object.value(P).toString(LOG_DEFAULT_FILENAME) : LOG_DEFAULT_FILENAME;
+
+          /* date_format */
+          P = "date_format";
+          p.date_format = object.contains(P) ? object.value(P).toString(LOG_DEFAULT_DATE_FORMAT) : LOG_DEFAULT_DATE_FORMAT;
+
+          /* time_format */
+          P = "time_format";
+          p.time_format = object.contains(P) ? object.value(P).toString(LOG_DEFAULT_TIME_FORMAT) : LOG_DEFAULT_TIME_FORMAT;
+
+          /* truncate_on_rotation */
+          P = "truncate_on_rotation";
+          p.truncate_on_rotation = object.contains(P) ? object.value(P).toBool(false) : false;
+
+          /* rotation_age */
+          P = "rotation_age";
+          p.rotation_age = object.contains(P) ? object.value(P).toInt(LOG_DEFAULT_ROTATION_AGE) : LOG_DEFAULT_ROTATION_AGE;
+
+          /* rotation_size */
+          P = "rotation_size";
+          p.rotation_size = object.contains(P) ? object.value(P).toInt(LOG_DEFAULT_ROTATION_SIZE) : LOG_DEFAULT_ROTATION_SIZE;
+
+          return p;
+
+        }
+
+        QString toJsonString(QJsonDocument::JsonFormat format = QJsonDocument::Indented) const
+        {
+          QJsonDocument jd;
+          jd.setObject(toJsonObject());
+
+          return QString(jd.toJson(format));
+        }
+
+        QJsonObject toJsonObject() const
+        {
+          QJsonObject j;
+
+          j.insert("enable",                QJsonValue(enable).toBool());
+          j.insert("level",                 QJsonValue(levelToString(level)).toString());
+//          j.insert("devices",      ;
+          j.insert("path",                  QJsonValue(path).toString());
+          j.insert("filename",              QJsonValue(filename).toString());
+          j.insert("date_format",           QJsonValue(date_format).toString());
+          j.insert("time_format",           QJsonValue(time_format).toString());
+          j.insert("truncate_on_rotation",  QJsonValue(truncate_on_rotation).toBool());
+          j.insert("rotation_age",          QJsonValue(int(rotation_age)).toInt());
+          j.insert("rotation_size",         QJsonValue(rotation_size).toInt());
+
+          return j;
+        }
+    };
 
     class sender
     {
