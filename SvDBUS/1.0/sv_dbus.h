@@ -109,7 +109,7 @@ namespace sv {
         log(level, type, str, sender);
     }
 
-    static void sendmsg(const sv::log::sender &sender, const QString& message, const QString &type);
+    static void sendmsg(const sv::log::sender &sender, const QString &type, const QString& message);
 
     static QMutex mutex;
 

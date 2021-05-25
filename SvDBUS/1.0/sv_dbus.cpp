@@ -29,7 +29,7 @@ void sv::SvDBus::log(sv::log::Level level, sv::log::MessageTypes type, const QSt
   {
 
     QString msg = QString("%1").arg(text); //.arg(newline ? "\n" : "");
-    sendmsg(sender, msg, sv::log::typeToString(type));
+    sendmsg(sender, sv::log::typeToString(type), msg);
 
     if(newline)
       p_current_line_num++;
@@ -44,14 +44,14 @@ void sv::SvDBus::log(sv::log::Level level, sv::log::MessageTypes type, const QSt
 //  mutex.unlock();
 }
 
-void sv::SvDBus::sendmsg(const log::sender &sender, const QString& message, const QString &type)
+void sv::SvDBus::sendmsg(const log::sender &sender, const QString &type, const QString& message)
 {
   // при создании лочится, при завершении функции - locker удаляется, и разлочивается
   QMutexLocker locker(&mutex);
 
   QDBusMessage msg = QDBusMessage::createSignal(QString("/%1").arg(sender.entity()), DBUS_SERVER_NAME, "message");
 
-  msg << QString::number(sender.id()) << message << type;
+  msg << QString::number(sender.id()) << type << message;
 
   QDBusConnection::sessionBus().send(msg);
 }
