@@ -51,7 +51,7 @@ void sv::SvDBus::sendmsg(const log::sender &sender, const QString &type, const Q
 
   QDBusMessage msg = QDBusMessage::createSignal(QString("/%1").arg(sender.entity()), DBUS_SERVER_NAME, "message");
 
-  msg << QString::number(sender.id()) << type << message;
+  msg << sender.entity() << sender.id() << type << message;
 
   QDBusConnection::sessionBus().send(msg);
 }

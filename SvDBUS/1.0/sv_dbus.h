@@ -32,7 +32,7 @@ public:
 public Q_SLOTS: // METHODS
 Q_SIGNALS: // SIGNALS
     void action(const QString &nickname, const QString &text);
-    void message(const QString &sender, const QString &text, const QString &type);
+    void message(const QString &entity, int id, const QString &text, const QString &type);
 };
 
 namespace proj {
@@ -54,7 +54,8 @@ class ModusDBusAdaptor: public QDBusAbstractAdaptor
     Q_CLASSINFO("D-Bus Introspection", ""
 "  <interface name=\"" DBUS_SERVER_NAME "\">\n"
 "    <signal name=\"message\">\n"
-"      <arg direction=\"out\" type=\"s\" name=\"sender\"/>\n"
+"      <arg direction=\"out\" type=\"s\" name=\"entity\"/>\n"
+"      <arg direction=\"out\" type=\"i\" name=\"id\"/>\n"
 "      <arg direction=\"out\" type=\"s\" name=\"text\"/>\n"
 "      <arg direction=\"out\" type=\"s\" name=\"type\"/>\n"
 "    </signal>\n"
@@ -79,7 +80,7 @@ public: // PROPERTIES
 public Q_SLOTS: // METHODS
 Q_SIGNALS: // SIGNALS
     void action(const QString &nickname, const QString &text);
-    void message(const QString &sender, const QString &text, const QString &type);
+    void message(const QString &entity, int id, const QString &text, const QString &type);
 };
 
 
