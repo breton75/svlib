@@ -69,6 +69,7 @@ namespace sv
       mtConnection = 0x000F0000,
 
       mtAny        = 0xFFFFFFFF
+//      mtAll        = 0xFFFFFFFF
 
 
     };
@@ -156,7 +157,10 @@ namespace sv
                                                    {sv::log::MessageTypes::mtLost,       "lost"},
                                                    {sv::log::MessageTypes::mtLogin,      "login"},
                                                    {sv::log::MessageTypes::mtRequest,    "request"},
-                                                   {sv::log::MessageTypes::mtConnection, "connection"}
+                                                   {sv::log::MessageTypes::mtConnection, "connection"},
+
+                                                   {sv::log::MessageTypes::mtAny,        "any"}
+//                                                   {sv::log::MessageTypes::mtAll,        "all"}
 
     };
 

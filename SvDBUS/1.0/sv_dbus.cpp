@@ -22,9 +22,6 @@ void sv::SvDBus::init(const QString& branch)
 
 void sv::SvDBus::log(sv::log::Level level, sv::log::MessageTypes type, const QString text, sv::log::sender sender, bool newline)
 {
-
-//  mutex.lock();
-
   if(p_options.enable && (level <= p_options.level))
   {
 
