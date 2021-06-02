@@ -46,9 +46,13 @@ void sv::SvDBus::sendmsg(const log::sender &sender, const QString &type, const Q
   // при создании лочится, при завершении функции - locker удаляется, и разлочивается
   QMutexLocker locker(&mutex);
 
-  QDBusMessage msg = QDBusMessage::createSignal(QString("/%1").arg(sender.entity()), DBUS_SERVER_NAME, "message");
+  QDBusMessage msg = QDBusMessage::createSignal(QString("/%1").arg(sender.module()), DBUS_SERVER_NAME, "message");
 
-  msg << sender.entity() << sender.id() << type << message;
+  msg << sender.module()
+      << sender.id()
+      << type
+      << QDateTime::currentDateTime().toString("ddMMyy-hh:mm:ss:zzz")
+      << message;
 
   QDBusConnection::sessionBus().send(msg);
 }

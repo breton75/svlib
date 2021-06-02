@@ -5,7 +5,7 @@
 #include <QtDBus>
 #include <QDebug>
 
-#include "../../SvAbstractLogger/1.2/sv_abstract_logger.h"
+#include "../../SvAbstractLogger/svabstractlogger.h"
 
 #define DBUS_SERVER_NAME "proj.modus"
 
@@ -32,7 +32,7 @@ public:
 public Q_SLOTS: // METHODS
 Q_SIGNALS: // SIGNALS
     void action(const QString &nickname, const QString &text);
-    void message(const QString &entity, int id, const QString &text, const QString &type);
+    void message(const QString &module, int id, const QString &type, const QString &time, const QString &text);
 };
 
 namespace proj {
@@ -54,10 +54,11 @@ class ModusDBusAdaptor: public QDBusAbstractAdaptor
     Q_CLASSINFO("D-Bus Introspection", ""
 "  <interface name=\"" DBUS_SERVER_NAME "\">\n"
 "    <signal name=\"message\">\n"
-"      <arg direction=\"out\" type=\"s\" name=\"entity\"/>\n"
+"      <arg direction=\"out\" type=\"s\" name=\"module\"/>\n"
 "      <arg direction=\"out\" type=\"i\" name=\"id\"/>\n"
-"      <arg direction=\"out\" type=\"s\" name=\"text\"/>\n"
 "      <arg direction=\"out\" type=\"s\" name=\"type\"/>\n"
+"      <arg direction=\"out\" type=\"s\" name=\"time\"/>\n"
+"      <arg direction=\"out\" type=\"s\" name=\"text\"/>\n"
 "    </signal>\n"
 "    <signal name=\"action\">\n"
 "      <arg direction=\"out\" type=\"s\" name=\"nickname\"/>\n"
@@ -80,7 +81,7 @@ public: // PROPERTIES
 public Q_SLOTS: // METHODS
 Q_SIGNALS: // SIGNALS
     void action(const QString &nickname, const QString &text);
-    void message(const QString &entity, int id, const QString &text, const QString &type);
+    void message(const QString &module, int id, const QString &type, const QString &time, const QString &text);
 };
 
 

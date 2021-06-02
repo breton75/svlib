@@ -319,17 +319,21 @@ namespace sv
     class sender
     {
       public:
-//        explicit sender(const QString& senderName = ""): name(senderName){ }
-        explicit sender(const QString& entity, int id = 0):
-          m_entity(entity),
+        explicit sender():
+          m_module(QString()),
+          m_id(0)
+        { }
+
+        explicit sender(const QString& module, int id = 0):
+          m_module(module),
           m_id(id)
         { }
 
-        QString entity() const { return m_entity; }
+        QString module() const { return m_module; }
         int     id()     const { return m_id;   }
 
         private:
-          QString m_entity;
+          QString m_module;
           int     m_id;
 
     };
