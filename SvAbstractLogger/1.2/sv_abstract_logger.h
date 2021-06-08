@@ -36,8 +36,8 @@ namespace sv
       // служебные
       mtSimple    = 0x00000001,
       mtInfo      = 0x00000002,
-      mtDebug     = 0x00000004,
-      mtDebug2    = 0x00000006,
+      mtEvent     = 0x00000004,
+      mtAction    = 0x00000006,
       mtDuty      = 0x0000000F,
 
       // ошибки и предпреждения
@@ -58,7 +58,7 @@ namespace sv
       mtReceive   = 0x00001000,
       mtSend      = 0x00002000,
       mtReset     = 0x00004000,
-      mtParsed    = 0x00008000,
+      mtParse     = 0x00008000,
       mtExcange   = 0x0000F000,
 
       // подключение и логин
@@ -67,6 +67,13 @@ namespace sv
       mtLogin      = 0x00040000,
       mtRequest    = 0x00080000,
       mtConnection = 0x000F0000,
+
+      // debug
+      mtDebug1     = 0x00100000,
+      mtDebug2     = 0x00200000,
+      mtDebug3     = 0x00400000,
+      mtDebug4     = 0x00800000,
+      mtDebug      = 0x00F00000,
 
       mtAny        = 0xFFFFFFFF
 //      mtAll        = 0xFFFFFFFF
@@ -131,8 +138,8 @@ namespace sv
 
                                                    {sv::log::MessageTypes::mtSimple,     "simple"},
                                                    {sv::log::MessageTypes::mtInfo,       "info"},
-                                                   {sv::log::MessageTypes::mtDebug,      "debug"},
-                                                   {sv::log::MessageTypes::mtDebug2,     "debug"},
+                                                   {sv::log::MessageTypes::mtEvent,      "event"},
+                                                   {sv::log::MessageTypes::mtAction,     "action"},
                                                    {sv::log::MessageTypes::mtDuty,       "duty"},
 
                                                    {sv::log::MessageTypes::mtAttention,  "attention"},
@@ -150,7 +157,7 @@ namespace sv
                                                    {sv::log::MessageTypes::mtReceive,    "receive"},
                                                    {sv::log::MessageTypes::mtSend,       "send"},
                                                    {sv::log::MessageTypes::mtReset,      "reset"},
-                                                   {sv::log::MessageTypes::mtParsed,     "parsed"},
+                                                   {sv::log::MessageTypes::mtParse,      "parse"},
                                                    {sv::log::MessageTypes::mtExcange,    "excange"},
 
                                                    {sv::log::MessageTypes::mtConnect,    "connect"},
@@ -158,6 +165,12 @@ namespace sv
                                                    {sv::log::MessageTypes::mtLogin,      "login"},
                                                    {sv::log::MessageTypes::mtRequest,    "request"},
                                                    {sv::log::MessageTypes::mtConnection, "connection"},
+
+                                                   {sv::log::MessageTypes::mtDebug1,     "debug1"},
+                                                   {sv::log::MessageTypes::mtDebug2,     "debug2"},
+                                                   {sv::log::MessageTypes::mtDebug3,     "debug3"},
+                                                   {sv::log::MessageTypes::mtDebug4,     "debug4"},
+                                                   {sv::log::MessageTypes::mtDebug,      "debug"},
 
                                                    {sv::log::MessageTypes::mtAny,        "any"}
 //                                                   {sv::log::MessageTypes::mtAll,        "all"}
